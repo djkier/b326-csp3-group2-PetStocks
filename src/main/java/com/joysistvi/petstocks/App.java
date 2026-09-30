@@ -8,6 +8,7 @@ import com.joysistvi.petstocks.cliview.ProductPetTypeView;
 import com.joysistvi.petstocks.cliview.ProductView;
 import com.joysistvi.petstocks.cliview.RestockView;
 import com.joysistvi.petstocks.cliview.SupplierView;
+import com.joysistvi.petstocks.cliview.UserView;
 import com.joysistvi.petstocks.config.DBConnection;
 import com.joysistvi.petstocks.controller.CategoryController;
 import com.joysistvi.petstocks.controller.DispatchController;
@@ -17,6 +18,7 @@ import com.joysistvi.petstocks.controller.ProductPetTypeController;
 import com.joysistvi.petstocks.controller.ProductController;
 import com.joysistvi.petstocks.controller.RestockController;
 import com.joysistvi.petstocks.controller.SupplierController;
+import com.joysistvi.petstocks.controller.UserController;
 import com.joysistvi.petstocks.repository.CategoryRepo;
 import com.joysistvi.petstocks.repository.CategoryRepoImpl;
 import com.joysistvi.petstocks.repository.DispatchRepo;
@@ -33,6 +35,8 @@ import com.joysistvi.petstocks.repository.RestockRepo;
 import com.joysistvi.petstocks.repository.RestockRepoImpl;
 import com.joysistvi.petstocks.repository.SupplierRepo;
 import com.joysistvi.petstocks.repository.SupplierRepoImpl;
+import com.joysistvi.petstocks.repository.UserRepo;
+import com.joysistvi.petstocks.repository.UserRepoImpl;
 import com.joysistvi.petstocks.service.CategoryService;
 import com.joysistvi.petstocks.service.CategoryServiceImpl;
 import com.joysistvi.petstocks.service.DispatchService;
@@ -49,6 +53,8 @@ import com.joysistvi.petstocks.service.RestockService;
 import com.joysistvi.petstocks.service.RestockServiceImpl;
 import com.joysistvi.petstocks.service.SupplierService;
 import com.joysistvi.petstocks.service.SupplierServiceImpl;
+import com.joysistvi.petstocks.service.UserService;
+import com.joysistvi.petstocks.service.UserServiceImpl;
 
 import java.util.Scanner;
 
@@ -92,6 +98,10 @@ public class App {
                 dispatchRepo, inventoryRepo, productRepo);
         DispatchController dispatchController = new DispatchController(dispatchService);
 
+        UserRepo userRepo = new UserRepoImpl(dbConnection);
+        UserService userService = new UserServiceImpl(userRepo);
+        UserController userController = new UserController(userService);
+
         try (Scanner scanner = new Scanner(System.in)) {
             PetTypeView petTypeView = new PetTypeView(petTypeController, scanner);
             CategoryView categoryView = new CategoryView(categoryController, scanner);
@@ -105,9 +115,10 @@ public class App {
                     restockController, inventoryController, supplierController, scanner);
             DispatchView dispatchView = new DispatchView(
                     dispatchController, inventoryController, productController, scanner);
+            UserView userView = new UserView(userController, scanner);
 
             runDevelopmentMenu(scanner, petTypeView, categoryView, supplierView, productView,
-                    productPetTypeView, inventoryView, restockView, dispatchView);
+                    productPetTypeView, inventoryView, restockView, dispatchView, userView);
         }
     }
 
@@ -117,7 +128,8 @@ public class App {
                                            ProductPetTypeView productPetTypeView,
                                            InventoryView inventoryView,
                                            RestockView restockView,
-                                           DispatchView dispatchView) {
+                                           DispatchView dispatchView,
+                                           UserView userView) {
         int choice;
 
         do {
@@ -133,6 +145,7 @@ public class App {
             System.out.println("6. Test Inventory MVC");
             System.out.println("7. Test Restock MVC");
             System.out.println("8. Test Dispatch MVC");
+            System.out.println("9. Test User MVC");
             System.out.println("0. Exit");
             choice = promptInt(scanner, "Choice: ");
 
@@ -145,6 +158,7 @@ public class App {
                 case 6 -> inventoryView.run();
                 case 7 -> restockView.run();
                 case 8 -> dispatchView.run();
+                case 9 -> userView.run();
                 case 0 -> System.out.println("Exiting PetStock...");
                 default -> System.out.println("Invalid menu selection.");
             }
