@@ -26,20 +26,22 @@ public class PetTypeView {
 
             switch (choice) {
                 case 1 -> viewAllPetTypes();
-                case 2 -> findPetTypeById();
-                case 3 -> searchPetTypes();
-                case 4 -> createPetType();
-                case 5 -> updatePetType();
-                case 6 -> archivePetType();
-                case 7 -> restorePetType();
-                case 8 -> viewAllArchivedPetTypes();
-                case 9 -> deletePetType();
+                case 2 -> pauseAfter(findPetTypeById());
+                case 3 -> {
+                    searchPetTypes();
+                    pressEnterToContinue();
+                }
+                case 4 -> {
+                    createPetType();
+                    pressEnterToContinue();
+                }
+                case 5 -> pauseAfter(updatePetType());
+                case 6 -> runArchiveAndDeleteMenu();
                 case 0 -> System.out.println("Exiting PetStock...");
-                default -> System.out.println("Invalid menu selection.");
-            }
-
-            if (choice != 0) {
-                pressEnterToContinue();
+                default -> {
+                    System.out.println("Invalid menu selection.");
+                    pressEnterToContinue();
+                }
             }
         } while (choice != 0);
     }
@@ -47,30 +49,46 @@ public class PetTypeView {
     private void printMenu() {
         showHeader("Pet Type Management");
         System.out.println("1. View All Active Pet Types");
-        System.out.println("2. Find Pet Type By ID");
+        System.out.println("2. Find Pet Type by ID");
         System.out.println("3. Search Pet Types");
         System.out.println("4. Create Pet Type");
         System.out.println("5. Update Pet Type");
-        System.out.println("6. Archive Pet Type");
-        System.out.println("7. Restore Pet Type");
-        System.out.println("8. View Archived Pet Types");
-        System.out.println("9. Delete Archived Pet Type");
+        System.out.println("6. Archiving / Deleting Pet Types");
         System.out.println("0. Exit");
     }
 
     private void viewAllPetTypes() {
-        showHeader("Active Pet Types");
-        printPetTypes(petTypeController.handleViewAllPetTypes());
+        String sortBy = "id";
+        int choice;
+
+        do {
+            showHeader("Active Pet Types");
+            printPetTypes(petTypeController.handleViewAllPetTypes(sortBy));
+            printSortOptions();
+            choice = promptInt("Choice: ");
+
+            switch (choice) {
+                case 1 -> sortBy = "id";
+                case 2 -> sortBy = "name";
+                case 0 -> { }
+                default -> System.out.println("Invalid sort selection.");
+            }
+        } while (choice != 0);
     }
 
-    private void findPetTypeById() {
+    private boolean findPetTypeById() {
         showHeader("Find Pet Type By ID");
-        int id = promptInt("Pet type ID: ");
+        int id = promptInt("Pet type ID (0 to cancel): ");
+        if (id == 0) {
+            return false;
+        }
+
         PetType petType = petTypeController.handleGetPetTypeById(id);
 
         if (petType != null) {
             printPetTypes(List.of(petType));
         }
+        return true;
     }
 
     private void searchPetTypes() {
@@ -95,23 +113,27 @@ public class PetTypeView {
 
         if (isSuccess) {
             System.out.println();
-            viewAllPetTypes();
+            printPetTypes(petTypeController.handleViewAllPetTypes("id"));
         }
     }
 
-    private void updatePetType() {
+    private boolean updatePetType() {
         showHeader("Update Pet Type");
-        printPetTypes(petTypeController.handleViewAllPetTypes());
+        printPetTypes(petTypeController.handleViewAllPetTypes("id"));
 
-        int id = promptInt("Pet type ID to update: ");
+        int id = promptInt("Pet type ID to update (0 to cancel): ");
+        if (id == 0) {
+            return false;
+        }
+
         PetType current = petTypeController.handleGetPetTypeById(id);
 
         if (current == null) {
-            return;
+            return true;
         }
         if (current.isArchived()) {
             System.out.println("Restore this pet type before updating it.");
-            return;
+            return true;
         }
 
         System.out.print("New name [" + current.getName() + "] (Enter to keep): ");
@@ -136,52 +158,120 @@ public class PetTypeView {
 
         if (isSuccess) {
             System.out.println();
-            viewAllPetTypes();
+            printPetTypes(petTypeController.handleViewAllPetTypes("id"));
         }
+        return true;
     }
 
-    private void archivePetType() {
+    private boolean archivePetType() {
         showHeader("Archive Pet Type");
-        printPetTypes(petTypeController.handleViewAllPetTypes());
-        int id = promptInt("Pet type ID to archive: ");
+        printPetTypes(petTypeController.handleViewAllPetTypes("id"));
+        int id = promptInt("Pet type ID to archive (0 to cancel): ");
+        if (id == 0) {
+            return false;
+        }
 
         boolean isSuccess = petTypeController.handleArchivePetType(id);
         System.out.println(isSuccess
                 ? "Pet type archived successfully."
                 : "Failed to archive pet type. Check that the ID is active.");
+        return true;
     }
 
-    private void restorePetType() {
+    private boolean restorePetType() {
         showHeader("Restore Pet Type");
-        printPetTypes(petTypeController.handleViewArchivedPetTypes());
-        int id = promptInt("Pet type ID to restore: ");
+        printPetTypes(petTypeController.handleViewArchivedPetTypes("id"));
+        int id = promptInt("Pet type ID to restore (0 to cancel): ");
+        if (id == 0) {
+            return false;
+        }
 
         boolean isSuccess = petTypeController.handleRestorePetType(id);
         System.out.println(isSuccess
                 ? "Pet type restored successfully."
                 : "Failed to restore pet type. Check that the ID is archived.");
+        return true;
     }
 
     private void viewAllArchivedPetTypes() {
-        showHeader("Archived Pet Types");
-        printPetTypes(petTypeController.handleViewArchivedPetTypes());
+        String sortBy = "id";
+        int choice;
+
+        do {
+            showHeader("Archived Pet Types");
+            printPetTypes(petTypeController.handleViewArchivedPetTypes(sortBy));
+            printSortOptions();
+            choice = promptInt("Choice: ");
+
+            switch (choice) {
+                case 1 -> sortBy = "id";
+                case 2 -> sortBy = "name";
+                case 0 -> { }
+                default -> System.out.println("Invalid sort selection.");
+            }
+        } while (choice != 0);
     }
 
-    private void deletePetType() {
+    private boolean deletePetType() {
         showHeader("Delete Archived Pet Type");
-        printPetTypes(petTypeController.handleViewArchivedPetTypes());
-        int id = promptInt("Archived pet type ID to delete permanently: ");
+        printPetTypes(petTypeController.handleViewArchivedPetTypes("id"));
+        int id = promptInt("Archived pet type ID to delete permanently (0 to cancel): ");
+        if (id == 0) {
+            return false;
+        }
 
         System.out.print("This cannot be undone. Type DELETE to confirm: ");
         if (!"DELETE".equals(scanner.nextLine())) {
             System.out.println("Delete cancelled.");
-            return;
+            return true;
         }
 
         boolean isSuccess = petTypeController.handleDeletePetType(id);
         System.out.println(isSuccess
                 ? "Pet type deleted successfully."
                 : "Failed to delete pet type. It must be archived and not referenced by a product.");
+        return true;
+    }
+
+    private void runArchiveAndDeleteMenu() {
+        int choice;
+
+        do {
+            printArchiveAndDeleteMenu();
+            choice = promptInt("Choice: ");
+
+            switch (choice) {
+                case 1 -> pauseAfter(archivePetType());
+                case 2 -> pauseAfter(restorePetType());
+                case 3 -> viewAllArchivedPetTypes();
+                case 4 -> pauseAfter(deletePetType());
+                case 0 -> { }
+                default -> {
+                    System.out.println("Invalid menu selection.");
+                    pressEnterToContinue();
+                }
+            }
+        } while (choice != 0);
+    }
+
+    private void printArchiveAndDeleteMenu() {
+        showHeader("Archiving / Deleting Pet Types");
+        System.out.println("1. Archive Pet Type");
+        System.out.println("2. Restore Pet Type");
+        System.out.println("3. View Archived Pet Types");
+        System.out.println("4. Delete Archived Pet Type");
+        System.out.println("0. Back");
+    }
+
+    private void printSortOptions() {
+        System.out.println();
+        System.out.println("Sort by: [1] ID        [2] Name        [0] Back");
+    }
+
+    private void pauseAfter(boolean shouldPause) {
+        if (shouldPause) {
+            pressEnterToContinue();
+        }
     }
 
     public void printPetTypes(List<PetType> petTypes) {

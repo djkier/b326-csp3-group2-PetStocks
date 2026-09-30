@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface PetTypeRepo {
     List<PetType> getAllPetTypes();
+    List<PetType> getAllPetTypes(String sortBy);
     PetType getPetTypeById(int id);
     List<PetType> searchPetTypes(String keyword);
     boolean createPetType(PetType petType);
@@ -14,4 +15,5 @@ public interface PetTypeRepo {
     boolean restorePetType(int id);
     boolean deletePetType(int id);
     List<PetType> getAllArchivedPetTypes();
+    List<PetType> getAllArchivedPetTypes(String sortBy);
 }

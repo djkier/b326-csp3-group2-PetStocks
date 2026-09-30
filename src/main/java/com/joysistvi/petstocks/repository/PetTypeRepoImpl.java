@@ -21,9 +21,15 @@ public class PetTypeRepoImpl implements PetTypeRepo {
 
     @Override
     public List<PetType> getAllPetTypes() {
+        return getAllPetTypes("id");
+    }
+
+    @Override
+    public List<PetType> getAllPetTypes(String sortBy) {
         List<PetType> petTypes = new ArrayList<>();
+        String sortColumn = getApprovedSortColumn(sortBy);
         String query = "SELECT id, name, description, is_archived " +
-                "FROM pet_types WHERE is_archived = 0 ORDER BY name";
+                "FROM pet_types WHERE is_archived = 0 ORDER BY " + sortColumn;
 
         try (Connection conn = dbConnection.getConnection();
              Statement statement = conn.createStatement();
@@ -149,9 +155,15 @@ public class PetTypeRepoImpl implements PetTypeRepo {
 
     @Override
     public List<PetType> getAllArchivedPetTypes() {
+        return getAllArchivedPetTypes("id");
+    }
+
+    @Override
+    public List<PetType> getAllArchivedPetTypes(String sortBy) {
         List<PetType> petTypes = new ArrayList<>();
+        String sortColumn = getApprovedSortColumn(sortBy);
         String query = "SELECT id, name, description, is_archived " +
-                "FROM pet_types WHERE is_archived = 1 ORDER BY name";
+                "FROM pet_types WHERE is_archived = 1 ORDER BY " + sortColumn;
 
         try (Connection conn = dbConnection.getConnection();
              Statement statement = conn.createStatement();
@@ -165,6 +177,10 @@ public class PetTypeRepoImpl implements PetTypeRepo {
         }
 
         return petTypes;
+    }
+
+    private String getApprovedSortColumn(String sortBy) {
+        return "name".equals(sortBy) ? "name" : "id";
     }
 
     private boolean updateArchiveStatus(int id, boolean currentStatus, boolean newStatus,
