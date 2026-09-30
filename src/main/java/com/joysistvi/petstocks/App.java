@@ -12,6 +12,7 @@ import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
+
         DBConnection dbConnection = new DBConnection();
         PetTypeRepo petTypeRepo = new PetTypeRepoImpl(dbConnection);
         PetTypeService petTypeService = new PetTypeServiceImpl(petTypeRepo);
@@ -21,5 +22,6 @@ public class App {
             PetTypeView petTypeView = new PetTypeView(petTypeController, scanner);
             petTypeView.run();
         }
+
     }
 }
