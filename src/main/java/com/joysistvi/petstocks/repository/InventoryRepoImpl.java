@@ -187,7 +187,7 @@ public class InventoryRepoImpl implements InventoryRepo {
 
             prep.setInt(1, inventory.getProduct().getId());
             prep.setInt(2, inventory.getQuantity());
-            prep.setDate(3, Date.valueOf(inventory.getExpiration()));
+            setNullableExpiration(prep, 3, inventory.getExpiration());
             prep.setString(4, inventory.getBatchCode());
             setNullableRemark(prep, 5, inventory.getRemark());
             return prep.executeUpdate() > 0;
@@ -208,7 +208,7 @@ public class InventoryRepoImpl implements InventoryRepo {
 
             prep.setInt(1, inventory.getProduct().getId());
             prep.setInt(2, inventory.getQuantity());
-            prep.setDate(3, Date.valueOf(inventory.getExpiration()));
+            setNullableExpiration(prep, 3, inventory.getExpiration());
             prep.setString(4, inventory.getBatchCode());
             setNullableRemark(prep, 5, inventory.getRemark());
             prep.setInt(6, inventory.getId());
@@ -254,14 +254,28 @@ public class InventoryRepoImpl implements InventoryRepo {
                 category
         );
 
+        Date sqlExpiration = result.getDate("expiration");
+        LocalDate expiration = sqlExpiration != null
+                ? sqlExpiration.toLocalDate()
+                : null;
+
         return new Inventory(
                 result.getInt("inventory_id"),
                 product,
                 result.getInt("quantity"),
-                result.getDate("expiration").toLocalDate(),
+                expiration,
                 result.getString("batch_code"),
                 result.getString("remark")
         );
+    }
+
+    private void setNullableExpiration(PreparedStatement prep, int parameterIndex,
+                                       LocalDate expiration) throws SQLException {
+        if (expiration == null) {
+            prep.setNull(parameterIndex, Types.DATE);
+        } else {
+            prep.setDate(parameterIndex, Date.valueOf(expiration));
+        }
     }
 
     private void setNullableRemark(PreparedStatement prep, int parameterIndex,

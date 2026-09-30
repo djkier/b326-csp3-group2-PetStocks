@@ -165,10 +165,12 @@ public class InventoryView {
         }
 
         int quantity = promptInt("Quantity: ");
-        LocalDate expiration = promptDate("Expiration (YYYY-MM-DD, 0 to cancel): ", null);
-        if (expiration == null) {
+        DateInput expirationInput = promptExpiration(
+                "Expiration (YYYY-MM-DD, Enter for N/A, 0 to cancel): ", null, false);
+        if (expirationInput.cancelled()) {
             return false;
         }
+        LocalDate expiration = expirationInput.expiration();
 
         System.out.print("Batch code: ");
         String batchCode = scanner.nextLine();
@@ -210,13 +212,14 @@ public class InventoryView {
         int quantity = promptOptionalInt(
                 "New quantity [" + current.getQuantity() + "] (Enter to keep): ",
                 current.getQuantity());
-        LocalDate expiration = promptDate(
-                "New expiration [" + current.getExpiration() +
-                        "] (Enter to keep, 0 to cancel): ",
-                current.getExpiration());
-        if (expiration == null) {
+        DateInput expirationInput = promptExpiration(
+                "New expiration [" + formatExpiration(current.getExpiration()) +
+                        "] (Enter for N/A, KEEP to retain, 0 to cancel): ",
+                current.getExpiration(), true);
+        if (expirationInput.cancelled()) {
             return false;
         }
+        LocalDate expiration = expirationInput.expiration();
 
         System.out.print("New batch code [" + current.getBatchCode() + "] (Enter to keep): ");
         String batchCode = keepCurrentIfBlank(scanner.nextLine(), current.getBatchCode());
@@ -338,13 +341,14 @@ public class InventoryView {
         for (Inventory item : inventory) {
             Product product = item.getProduct();
             String remark = item.getRemark() == null ? "" : item.getRemark();
+            String expiration = formatExpiration(item.getExpiration());
             System.out.printf("| %-4d | %-25s | %-18s | %-20s | %-8d | %-10s | %-20s | %-30s | %-10s |%n",
                     item.getId(),
                     truncate(product.getName(), PRODUCT_DISPLAY_WIDTH),
                     truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
                     truncate(product.getCategory().getName(), CATEGORY_DISPLAY_WIDTH),
                     item.getQuantity(),
-                    item.getExpiration(),
+                    expiration,
                     truncate(item.getBatchCode(), BATCH_DISPLAY_WIDTH),
                     truncate(remark, REMARK_DISPLAY_WIDTH),
                     product.isArchived() ? "Archived" : "Active");
@@ -357,23 +361,37 @@ public class InventoryView {
         System.out.println("Sort by: [1] ID    [2] Product    [3] Quantity    [4] Expiration    [0] Back");
     }
 
-    private LocalDate promptDate(String prompt, LocalDate currentValue) {
+    private DateInput promptExpiration(String prompt, LocalDate currentValue,
+                                       boolean allowKeep) {
         while (true) {
             System.out.print(prompt);
             String input = scanner.nextLine().trim();
-            if (input.isEmpty() && currentValue != null) {
-                return currentValue;
-            }
             if ("0".equals(input)) {
-                return null;
+                return new DateInput(null, true);
+            }
+            if (input.isEmpty() || "N/A".equalsIgnoreCase(input)
+                    || "NONE".equalsIgnoreCase(input)) {
+                return new DateInput(null, false);
+            }
+            if (allowKeep && "KEEP".equalsIgnoreCase(input)) {
+                return new DateInput(currentValue, false);
             }
 
             try {
-                return LocalDate.parse(input);
+                return new DateInput(LocalDate.parse(input), false);
             } catch (DateTimeParseException e) {
-                System.out.println("Enter a valid date in YYYY-MM-DD format.");
+                String options = allowKeep ? ", KEEP, or 0" : " or 0";
+                System.out.println("Enter a valid date in YYYY-MM-DD format, leave blank for N/A" +
+                        options + ".");
             }
         }
+    }
+
+    private String formatExpiration(LocalDate expiration) {
+        return expiration == null ? "N/A" : expiration.toString();
+    }
+
+    private record DateInput(LocalDate expiration, boolean cancelled) {
     }
 
     private int promptOptionalInt(String prompt, int currentValue) {

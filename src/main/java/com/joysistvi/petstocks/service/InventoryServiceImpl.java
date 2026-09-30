@@ -145,10 +145,6 @@ public class InventoryServiceImpl implements InventoryService {
             System.out.println("Inventory quantity cannot be negative.");
             return false;
         }
-        if (inventory.getExpiration() == null) {
-            System.out.println("Inventory expiration date is required.");
-            return false;
-        }
         if (inventory.getBatchCode() == null || inventory.getBatchCode().trim().isEmpty()) {
             System.out.println("Batch code is required.");
             return false;
