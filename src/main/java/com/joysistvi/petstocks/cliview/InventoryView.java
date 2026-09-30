@@ -11,11 +11,15 @@ import java.util.List;
 import java.util.Scanner;
 
 public class InventoryView {
-    private static final int PRODUCT_DISPLAY_WIDTH = 25;
-    private static final int BRAND_DISPLAY_WIDTH = 18;
-    private static final int CATEGORY_DISPLAY_WIDTH = 20;
-    private static final int BATCH_DISPLAY_WIDTH = 20;
-    private static final int REMARK_DISPLAY_WIDTH = 30;
+    private static final int ID_DISPLAY_WIDTH = 4;
+    private static final int PRODUCT_DISPLAY_WIDTH = 20;
+    private static final int BRAND_DISPLAY_WIDTH = 12;
+    private static final int CATEGORY_DISPLAY_WIDTH = 18;
+    private static final int QUANTITY_DISPLAY_WIDTH = 8;
+    private static final int EXPIRATION_DISPLAY_WIDTH = 12;
+    private static final int BATCH_DISPLAY_WIDTH = 14;
+    private static final int REMARK_DISPLAY_WIDTH = 20;
+    private static final int STATUS_DISPLAY_WIDTH = 10;
 
     private final InventoryController inventoryController;
     private final ProductController productController;
@@ -165,10 +169,12 @@ public class InventoryView {
         }
 
         int quantity = promptInt("Quantity: ");
-        LocalDate expiration = promptDate("Expiration (YYYY-MM-DD, 0 to cancel): ", null);
-        if (expiration == null) {
+        DateInput expirationInput = promptExpiration(
+                "Expiration (YYYY-MM-DD, Enter for N/A, 0 to cancel): ", null, false);
+        if (expirationInput.cancelled()) {
             return false;
         }
+        LocalDate expiration = expirationInput.expiration();
 
         System.out.print("Batch code: ");
         String batchCode = scanner.nextLine();
@@ -210,13 +216,14 @@ public class InventoryView {
         int quantity = promptOptionalInt(
                 "New quantity [" + current.getQuantity() + "] (Enter to keep): ",
                 current.getQuantity());
-        LocalDate expiration = promptDate(
-                "New expiration [" + current.getExpiration() +
-                        "] (Enter to keep, 0 to cancel): ",
-                current.getExpiration());
-        if (expiration == null) {
+        DateInput expirationInput = promptExpiration(
+                "New expiration [" + formatExpiration(current.getExpiration()) +
+                        "] (Enter for N/A, KEEP to retain, 0 to cancel): ",
+                current.getExpiration(), true);
+        if (expirationInput.cancelled()) {
             return false;
         }
+        LocalDate expiration = expirationInput.expiration();
 
         System.out.print("New batch code [" + current.getBatchCode() + "] (Enter to keep): ");
         String batchCode = keepCurrentIfBlank(scanner.nextLine(), current.getBatchCode());
@@ -321,32 +328,40 @@ public class InventoryView {
             return;
         }
 
-        String border = "+" + "-".repeat(6) + "+" + "-".repeat(PRODUCT_DISPLAY_WIDTH + 2)
+        String border = "+" + "-".repeat(ID_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(PRODUCT_DISPLAY_WIDTH + 2)
                 + "+" + "-".repeat(BRAND_DISPLAY_WIDTH + 2)
-                + "+" + "-".repeat(CATEGORY_DISPLAY_WIDTH + 2) + "+" + "-".repeat(10)
-                + "+" + "-".repeat(12) + "+" + "-".repeat(BATCH_DISPLAY_WIDTH + 2)
-                + "+" + "-".repeat(REMARK_DISPLAY_WIDTH + 2) + "+" + "-".repeat(12) + "+";
+                + "+" + "-".repeat(CATEGORY_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(QUANTITY_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(EXPIRATION_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(BATCH_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(REMARK_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(STATUS_DISPLAY_WIDTH + 2) + "+";
+
+        String rowFormat = "| %-" + ID_DISPLAY_WIDTH + "s | %-"
+                + PRODUCT_DISPLAY_WIDTH + "s | %-" + BRAND_DISPLAY_WIDTH + "s | %-"
+                + CATEGORY_DISPLAY_WIDTH + "s | %-" + QUANTITY_DISPLAY_WIDTH + "s | %-"
+                + EXPIRATION_DISPLAY_WIDTH + "s | %-" + BATCH_DISPLAY_WIDTH + "s | %-"
+                + REMARK_DISPLAY_WIDTH + "s | %-" + STATUS_DISPLAY_WIDTH + "s |%n";
 
         System.out.println(border);
-        System.out.printf("| %-4s | %-25s | %-18s | %-20s | %-8s | %-10s | %-20s | %-30s | %-10s |%n",
+        System.out.printf(rowFormat,
                 "ID", "Product", "Brand", "Category", "Quantity", "Expiration",
-                "Batch Code", "Remark", "Product");
-        System.out.printf("| %-4s | %-25s | %-18s | %-20s | %-8s | %-10s | %-20s | %-30s | %-10s |%n",
-                "", "", "", "", "", "", "", "", "Status");
+                "Batch Code", "Remark", "Status");
         System.out.println(border);
 
         for (Inventory item : inventory) {
             Product product = item.getProduct();
-            String remark = item.getRemark() == null ? "" : item.getRemark();
-            System.out.printf("| %-4d | %-25s | %-18s | %-20s | %-8d | %-10s | %-20s | %-30s | %-10s |%n",
+            String expiration = formatExpiration(item.getExpiration());
+            System.out.printf(rowFormat,
                     item.getId(),
                     truncate(product.getName(), PRODUCT_DISPLAY_WIDTH),
                     truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
                     truncate(product.getCategory().getName(), CATEGORY_DISPLAY_WIDTH),
                     item.getQuantity(),
-                    item.getExpiration(),
+                    truncate(expiration, EXPIRATION_DISPLAY_WIDTH),
                     truncate(item.getBatchCode(), BATCH_DISPLAY_WIDTH),
-                    truncate(remark, REMARK_DISPLAY_WIDTH),
+                    truncate(item.getRemark(), REMARK_DISPLAY_WIDTH),
                     product.isArchived() ? "Archived" : "Active");
         }
         System.out.println(border);
@@ -357,23 +372,37 @@ public class InventoryView {
         System.out.println("Sort by: [1] ID    [2] Product    [3] Quantity    [4] Expiration    [0] Back");
     }
 
-    private LocalDate promptDate(String prompt, LocalDate currentValue) {
+    private DateInput promptExpiration(String prompt, LocalDate currentValue,
+                                       boolean allowKeep) {
         while (true) {
             System.out.print(prompt);
             String input = scanner.nextLine().trim();
-            if (input.isEmpty() && currentValue != null) {
-                return currentValue;
-            }
             if ("0".equals(input)) {
-                return null;
+                return new DateInput(null, true);
+            }
+            if (input.isEmpty() || "N/A".equalsIgnoreCase(input)
+                    || "NONE".equalsIgnoreCase(input)) {
+                return new DateInput(null, false);
+            }
+            if (allowKeep && "KEEP".equalsIgnoreCase(input)) {
+                return new DateInput(currentValue, false);
             }
 
             try {
-                return LocalDate.parse(input);
+                return new DateInput(LocalDate.parse(input), false);
             } catch (DateTimeParseException e) {
-                System.out.println("Enter a valid date in YYYY-MM-DD format.");
+                String options = allowKeep ? ", KEEP, or 0" : " or 0";
+                System.out.println("Enter a valid date in YYYY-MM-DD format, leave blank for N/A" +
+                        options + ".");
             }
         }
+    }
+
+    private String formatExpiration(LocalDate expiration) {
+        return expiration == null ? "N/A" : expiration.toString();
+    }
+
+    private record DateInput(LocalDate expiration, boolean cancelled) {
     }
 
     private int promptOptionalInt(String prompt, int currentValue) {
@@ -428,6 +457,9 @@ public class InventoryView {
     }
 
     private String truncate(String value, int maxLength) {
+        if (value == null) {
+            return "";
+        }
         if (value.length() <= maxLength) {
             return value;
         }
