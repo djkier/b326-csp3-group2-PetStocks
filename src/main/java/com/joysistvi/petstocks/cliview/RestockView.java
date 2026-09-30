@@ -6,11 +6,12 @@ import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.model.Inventory;
 import com.joysistvi.petstocks.model.Restock;
 import com.joysistvi.petstocks.model.Supplier;
+import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,27 +42,27 @@ public class RestockView {
 
         do {
             printMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
-                case 1 -> pauseAfter(recordStockIn());
+                case 1 -> CliViewUtility.pauseAfter(scanner, recordStockIn());
                 case 2 -> viewRestockHistory();
-                case 3 -> pauseAfter(findRestockById());
-                case 4 -> pauseAfter(viewRestocksByInventory());
-                case 5 -> pauseAfter(viewRestocksBySupplier());
-                case 6 -> pauseAfter(viewRestocksByUser());
-                case 7 -> pauseAfter(viewRestocksByDateRange());
+                case 3 -> CliViewUtility.pauseAfter(scanner, findRestockById());
+                case 4 -> CliViewUtility.pauseAfter(scanner, viewRestocksByInventory());
+                case 5 -> CliViewUtility.pauseAfter(scanner, viewRestocksBySupplier());
+                case 6 -> CliViewUtility.pauseAfter(scanner, viewRestocksByUser());
+                case 7 -> CliViewUtility.pauseAfter(scanner, viewRestocksByDateRange());
                 case 0 -> System.out.println("Returning to the development menu...");
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printMenu() {
-        showHeader("Restock / Stock-In Management");
+        CliViewUtility.showHeader("Restock / Stock-In Management");
         System.out.println("1. Record Stock In");
         System.out.println("2. View Restock History");
         System.out.println("3. Find Restock by ID");
@@ -73,7 +74,7 @@ public class RestockView {
     }
 
     private boolean recordStockIn() {
-        showHeader("Record Stock In");
+        CliViewUtility.showHeader("Record Stock In");
 
         Inventory inventory = selectInventory();
         if (inventory == null) {
@@ -90,18 +91,22 @@ public class RestockView {
             return false;
         }
 
-        int quantityDelivered = promptInt("Quantity delivered (0 to cancel): ");
+        int quantityDelivered = InputUtility.readInt(scanner, "Quantity delivered (0 to cancel): ");
         if (quantityDelivered == 0) {
             return false;
         }
 
-        DateTimeInput deliveryInput = promptDeliveryDateTime();
-        if (deliveryInput.cancelled()) {
+        LocalDateTime datetimeDelivered = InputUtility.readDateTimeOrNow(
+                scanner,
+                "Delivery date/time (YYYY-MM-DD HH:mm, Enter for now, 0 to cancel): ",
+                DATE_TIME_INPUT,
+                "YYYY-MM-DD HH:mm");
+        if (datetimeDelivered == null) {
             return false;
         }
 
         Restock restock = new Restock(
-                inventory, supplier, deliveryInput.value(), quantityDelivered, userId);
+                inventory, supplier, datetimeDelivered, quantityDelivered, userId);
         boolean isSuccess = restockController.handleRecordStockIn(restock);
         System.out.println(isSuccess
                 ? "Stock-in recorded and inventory quantity increased successfully."
@@ -122,12 +127,12 @@ public class RestockView {
         int choice;
 
         do {
-            showHeader("Restock History");
+            CliViewUtility.showHeader("Restock History");
             printRestocks(restockController.handleViewRestockHistory(sortBy));
             System.out.println();
             System.out.println("Sort by: [1] Date  [2] ID  [3] Product  " +
                     "[4] Supplier  [5] User  [0] Back");
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "date";
@@ -142,8 +147,8 @@ public class RestockView {
     }
 
     private boolean findRestockById() {
-        showHeader("Find Restock By ID");
-        int id = promptInt("Restock ID (0 to cancel): ");
+        CliViewUtility.showHeader("Find Restock By ID");
+        int id = InputUtility.readInt(scanner, "Restock ID (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -156,9 +161,9 @@ public class RestockView {
     }
 
     private boolean viewRestocksByInventory() {
-        showHeader("Restocks By Inventory");
+        CliViewUtility.showHeader("Restocks By Inventory");
         printInventoryChoices(inventoryController.handleViewAllInventory("id"));
-        int inventoryId = promptInt("Inventory ID (0 to cancel): ");
+        int inventoryId = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (inventoryId == 0) {
             return false;
         }
@@ -168,13 +173,13 @@ public class RestockView {
     }
 
     private boolean viewRestocksBySupplier() {
-        showHeader("Restocks By Supplier");
+        CliViewUtility.showHeader("Restocks By Supplier");
         List<Supplier> suppliers = new ArrayList<>(
                 supplierController.handleViewAllSuppliers("id"));
         suppliers.addAll(supplierController.handleViewArchivedSuppliers("id"));
         printSupplierChoices(suppliers);
 
-        int supplierId = promptInt("Supplier ID (0 to cancel): ");
+        int supplierId = InputUtility.readInt(scanner, "Supplier ID (0 to cancel): ");
         if (supplierId == 0) {
             return false;
         }
@@ -184,10 +189,10 @@ public class RestockView {
     }
 
     private boolean viewRestocksByUser() {
-        showHeader("Restocks By User");
+        CliViewUtility.showHeader("Restocks By User");
         Map<Integer, String> users = restockController.handleGetAvailableUsers();
         printUserChoices(users);
-        int userId = promptInt("User ID (0 to cancel): ");
+        int userId = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
         if (userId == 0) {
             return false;
         }
@@ -197,8 +202,9 @@ public class RestockView {
     }
 
     private boolean viewRestocksByDateRange() {
-        showHeader("Restocks By Date / Date Range");
-        LocalDate startDate = promptDate("Start date (YYYY-MM-DD, 0 to cancel): ");
+        CliViewUtility.showHeader("Restocks By Date / Date Range");
+        LocalDate startDate = InputUtility.readDate(
+                scanner, "Start date (YYYY-MM-DD, 0 to cancel): ");
         if (startDate == null) {
             return false;
         }
@@ -209,14 +215,15 @@ public class RestockView {
             return false;
         }
 
-        LocalDate endDate = endInput.isEmpty() ? startDate : parseDate(endInput);
+        LocalDate endDate = endInput.isEmpty()
+                ? startDate : InputUtility.parseDateOrNull(endInput);
         while (endDate == null) {
             System.out.print("Enter a valid end date (YYYY-MM-DD, 0 to cancel): ");
             endInput = scanner.nextLine().trim();
             if ("0".equals(endInput)) {
                 return false;
             }
-            endDate = parseDate(endInput);
+            endDate = InputUtility.parseDateOrNull(endInput);
         }
 
         printRestocks(restockController.handleViewRestocksByDateRange(startDate, endDate));
@@ -232,7 +239,7 @@ public class RestockView {
 
         printInventoryChoices(inventory);
         while (true) {
-            int id = promptInt("Inventory ID (0 to cancel): ");
+            int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
             if (id == 0) {
                 return null;
             }
@@ -254,7 +261,7 @@ public class RestockView {
 
         printSupplierChoices(suppliers);
         while (true) {
-            int id = promptInt("Supplier ID (0 to cancel): ");
+            int id = InputUtility.readInt(scanner, "Supplier ID (0 to cancel): ");
             if (id == 0) {
                 return null;
             }
@@ -276,7 +283,7 @@ public class RestockView {
 
         printUserChoices(users);
         while (true) {
-            int id = promptInt("User ID (0 to cancel): ");
+            int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
             if (id == 0) {
                 return null;
             }
@@ -306,10 +313,10 @@ public class RestockView {
         for (Restock restock : restocks) {
             System.out.printf(rowFormat,
                     restock.getId(),
-                    truncate(restock.getInventory().getProduct().getName(), 20),
-                    truncate(restock.getInventory().getBatchCode(), 14),
-                    truncate(restock.getSupplier().getName(), 20),
-                    truncate(restock.getUsername(), 14),
+                    CliViewUtility.truncate(restock.getInventory().getProduct().getName(), 20),
+                    CliViewUtility.truncate(restock.getInventory().getBatchCode(), 14),
+                    CliViewUtility.truncate(restock.getSupplier().getName(), 20),
+                    CliViewUtility.truncate(restock.getUsername(), 14),
                     restock.getDatetimeDelivered().format(DATE_TIME_DISPLAY),
                     restock.getQuantityDelivered());
         }
@@ -326,8 +333,8 @@ public class RestockView {
         for (Inventory item : inventory) {
             System.out.printf("%-6d %-22s %-16s %-10d%n",
                     item.getId(),
-                    truncate(item.getProduct().getName(), 22),
-                    truncate(item.getBatchCode(), 16),
+                    CliViewUtility.truncate(item.getProduct().getName(), 22),
+                    CliViewUtility.truncate(item.getBatchCode(), 16),
                     item.getQuantity());
         }
     }
@@ -341,8 +348,8 @@ public class RestockView {
         System.out.printf("%-6s %-28s %-10s%n", "ID", "Supplier", "Status");
         for (Supplier supplier : suppliers) {
             System.out.printf("%-6d %-28s %-10s%n",
-                    supplier.getId(), truncate(supplier.getName(), 28),
-                    supplier.isArchived() ? "Archived" : "Active");
+                    supplier.getId(), CliViewUtility.truncate(supplier.getName(), 28),
+                    CliViewUtility.formatArchiveStatus(supplier.isArchived()));
         }
     }
 
@@ -354,92 +361,7 @@ public class RestockView {
 
         System.out.printf("%-6s %-30s%n", "ID", "Username");
         users.forEach((id, username) ->
-                System.out.printf("%-6d %-30s%n", id, truncate(username, 30)));
+                System.out.printf("%-6d %-30s%n", id, CliViewUtility.truncate(username, 30)));
     }
 
-    private DateTimeInput promptDeliveryDateTime() {
-        while (true) {
-            System.out.print("Delivery date/time (YYYY-MM-DD HH:mm, Enter for now, 0 to cancel): ");
-            String input = scanner.nextLine().trim();
-            if ("0".equals(input)) {
-                return new DateTimeInput(null, true);
-            }
-            if (input.isEmpty()) {
-                return new DateTimeInput(LocalDateTime.now(), false);
-            }
-
-            try {
-                return new DateTimeInput(LocalDateTime.parse(input, DATE_TIME_INPUT), false);
-            } catch (DateTimeParseException e) {
-                System.out.println("Enter a valid date and time in YYYY-MM-DD HH:mm format.");
-            }
-        }
-    }
-
-    private LocalDate promptDate(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-            if ("0".equals(input)) {
-                return null;
-            }
-
-            LocalDate date = parseDate(input);
-            if (date != null) {
-                return date;
-            }
-            System.out.println("Enter a valid date in YYYY-MM-DD format.");
-        }
-    }
-
-    private LocalDate parseDate(String value) {
-        try {
-            return LocalDate.parse(value);
-        } catch (DateTimeParseException e) {
-            return null;
-        }
-    }
-
-    private int promptInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number.");
-            }
-        }
-    }
-
-    private String truncate(String value, int maxLength) {
-        if (value == null) {
-            return "";
-        }
-        if (value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
-    }
-
-    private void pauseAfter(boolean shouldPause) {
-        if (shouldPause) {
-            pressEnterToContinue();
-        }
-    }
-
-    private void pressEnterToContinue() {
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    private void showHeader(String title) {
-        System.out.println();
-        System.out.println("=".repeat(72));
-        System.out.println(title);
-        System.out.println("=".repeat(72));
-    }
-
-    private record DateTimeInput(LocalDateTime value, boolean cancelled) {
-    }
 }

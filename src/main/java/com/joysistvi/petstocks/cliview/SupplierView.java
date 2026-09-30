@@ -2,6 +2,8 @@ package com.joysistvi.petstocks.cliview;
 
 import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.model.Supplier;
+import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.List;
 import java.util.Scanner;
@@ -25,32 +27,32 @@ public class SupplierView {
 
         do {
             printMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> viewAllSuppliers();
-                case 2 -> pauseAfter(findSupplierById());
+                case 2 -> CliViewUtility.pauseAfter(scanner, findSupplierById());
                 case 3 -> {
                     searchSuppliers();
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
                 case 4 -> {
                     createSupplier();
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
-                case 5 -> pauseAfter(updateSupplier());
+                case 5 -> CliViewUtility.pauseAfter(scanner, updateSupplier());
                 case 6 -> runArchiveAndDeleteMenu();
                 case 0 -> System.out.println("Returning to the development menu...");
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printMenu() {
-        showHeader("Supplier Management");
+        CliViewUtility.showHeader("Supplier Management");
         System.out.println("1. View All Active Suppliers");
         System.out.println("2. Find Supplier by ID");
         System.out.println("3. Search Suppliers");
@@ -65,10 +67,10 @@ public class SupplierView {
         int choice;
 
         do {
-            showHeader("Active Suppliers");
+            CliViewUtility.showHeader("Active Suppliers");
             printSuppliers(supplierController.handleViewAllSuppliers(sortBy));
             printSortOptions();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "id";
@@ -80,8 +82,8 @@ public class SupplierView {
     }
 
     private boolean findSupplierById() {
-        showHeader("Find Supplier By ID");
-        int id = promptInt("Supplier ID (0 to cancel): ");
+        CliViewUtility.showHeader("Find Supplier By ID");
+        int id = InputUtility.readInt(scanner, "Supplier ID (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -95,14 +97,14 @@ public class SupplierView {
     }
 
     private void searchSuppliers() {
-        showHeader("Search Suppliers");
+        CliViewUtility.showHeader("Search Suppliers");
         System.out.print("Enter name, address, contact number, or email: ");
         String keyword = scanner.nextLine();
         printSuppliers(supplierController.searchSuppliers(keyword));
     }
 
     private void createSupplier() {
-        showHeader("Create Supplier");
+        CliViewUtility.showHeader("Create Supplier");
         System.out.print("Name: ");
         String name = scanner.nextLine();
         System.out.print("Address: ");
@@ -125,10 +127,10 @@ public class SupplierView {
     }
 
     private boolean updateSupplier() {
-        showHeader("Update Supplier");
+        CliViewUtility.showHeader("Update Supplier");
         printSuppliers(supplierController.handleViewAllSuppliers("id"));
 
-        int id = promptInt("Supplier ID to update (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Supplier ID to update (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -144,17 +146,17 @@ public class SupplierView {
         }
 
         System.out.print("New name [" + current.getName() + "] (Enter to keep): ");
-        String name = keepCurrentIfBlank(scanner.nextLine(), current.getName());
+        String name = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getName());
 
         System.out.print("New address [" + current.getAddress() + "] (Enter to keep): ");
-        String address = keepCurrentIfBlank(scanner.nextLine(), current.getAddress());
+        String address = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getAddress());
 
         System.out.print("New contact number [" + current.getContactNumber() +
                 "] (Enter to keep): ");
-        String contactNumber = keepCurrentIfBlank(scanner.nextLine(), current.getContactNumber());
+        String contactNumber = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getContactNumber());
 
         System.out.print("New email [" + current.getEmail() + "] (Enter to keep): ");
-        String email = keepCurrentIfBlank(scanner.nextLine(), current.getEmail());
+        String email = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getEmail());
 
         Supplier supplier = new Supplier(id, name, address, contactNumber, email);
         boolean isSuccess = supplierController.handleUpdateSupplier(supplier);
@@ -170,9 +172,9 @@ public class SupplierView {
     }
 
     private boolean archiveSupplier() {
-        showHeader("Archive Supplier");
+        CliViewUtility.showHeader("Archive Supplier");
         printSuppliers(supplierController.handleViewAllSuppliers("id"));
-        int id = promptInt("Supplier ID to archive (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Supplier ID to archive (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -185,9 +187,9 @@ public class SupplierView {
     }
 
     private boolean restoreSupplier() {
-        showHeader("Restore Supplier");
+        CliViewUtility.showHeader("Restore Supplier");
         printSuppliers(supplierController.handleViewArchivedSuppliers("id"));
-        int id = promptInt("Supplier ID to restore (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Supplier ID to restore (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -204,10 +206,10 @@ public class SupplierView {
         int choice;
 
         do {
-            showHeader("Archived Suppliers");
+            CliViewUtility.showHeader("Archived Suppliers");
             printSuppliers(supplierController.handleViewArchivedSuppliers(sortBy));
             printSortOptions();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "id";
@@ -219,15 +221,14 @@ public class SupplierView {
     }
 
     private boolean deleteSupplier() {
-        showHeader("Delete Archived Supplier");
+        CliViewUtility.showHeader("Delete Archived Supplier");
         printSuppliers(supplierController.handleViewArchivedSuppliers("id"));
-        int id = promptInt("Archived supplier ID to delete permanently (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Archived supplier ID to delete permanently (0 to cancel): ");
         if (id == 0) {
             return false;
         }
 
-        System.out.print("This cannot be undone. Type DELETE to confirm: ");
-        if (!"DELETE".equals(scanner.nextLine())) {
+        if (!CliViewUtility.confirmExact(scanner, "This cannot be undone. Type DELETE to confirm: ", "DELETE")) {
             System.out.println("Delete cancelled.");
             return true;
         }
@@ -244,24 +245,24 @@ public class SupplierView {
 
         do {
             printArchiveAndDeleteMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
-                case 1 -> pauseAfter(archiveSupplier());
-                case 2 -> pauseAfter(restoreSupplier());
+                case 1 -> CliViewUtility.pauseAfter(scanner, archiveSupplier());
+                case 2 -> CliViewUtility.pauseAfter(scanner, restoreSupplier());
                 case 3 -> viewAllArchivedSuppliers();
-                case 4 -> pauseAfter(deleteSupplier());
+                case 4 -> CliViewUtility.pauseAfter(scanner, deleteSupplier());
                 case 0 -> { }
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printArchiveAndDeleteMenu() {
-        showHeader("Archiving / Deleting Suppliers");
+        CliViewUtility.showHeader("Archiving / Deleting Suppliers");
         System.out.println("1. Archive Supplier");
         System.out.println("2. Restore Supplier");
         System.out.println("3. View Archived Suppliers");
@@ -272,12 +273,6 @@ public class SupplierView {
     private void printSortOptions() {
         System.out.println();
         System.out.println("Sort by: [1] ID        [2] Name        [0] Back");
-    }
-
-    private void pauseAfter(boolean shouldPause) {
-        if (shouldPause) {
-            pressEnterToContinue();
-        }
     }
 
     public void printSuppliers(List<Supplier> suppliers) {
@@ -297,52 +292,17 @@ public class SupplierView {
         System.out.println(border);
 
         for (Supplier supplier : suppliers) {
-            String status = supplier.isArchived() ? "Archived" : "Active";
+            String status = CliViewUtility.formatArchiveStatus(supplier.isArchived());
             System.out.printf("| %-4d | %-25s | %-40s | %-20s | %-30s | %-10s |%n",
                     supplier.getId(),
-                    truncate(supplier.getName(), NAME_DISPLAY_WIDTH),
-                    truncate(supplier.getAddress(), ADDRESS_DISPLAY_WIDTH),
-                    truncate(supplier.getContactNumber(), CONTACT_DISPLAY_WIDTH),
-                    truncate(supplier.getEmail(), EMAIL_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(supplier.getName(), NAME_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(supplier.getAddress(), ADDRESS_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(supplier.getContactNumber(), CONTACT_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(supplier.getEmail(), EMAIL_DISPLAY_WIDTH),
                     status);
         }
 
         System.out.println(border);
     }
 
-    private String keepCurrentIfBlank(String value, String currentValue) {
-        return value.trim().isEmpty() ? currentValue : value;
-    }
-
-    private int promptInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number.");
-            }
-        }
-    }
-
-    private void pressEnterToContinue() {
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    private void showHeader(String title) {
-        System.out.println();
-        System.out.println("=".repeat(72));
-        System.out.println(title);
-        System.out.println("=".repeat(72));
-    }
-
-    private String truncate(String value, int maxLength) {
-        if (value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
-    }
 }

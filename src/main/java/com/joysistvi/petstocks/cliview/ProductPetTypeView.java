@@ -6,6 +6,8 @@ import com.joysistvi.petstocks.controller.ProductPetTypeController;
 import com.joysistvi.petstocks.model.PetType;
 import com.joysistvi.petstocks.model.Product;
 import com.joysistvi.petstocks.model.ProductPetType;
+import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.List;
 import java.util.Scanner;
@@ -30,25 +32,25 @@ public class ProductPetTypeView {
 
         do {
             printMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
-                case 1 -> pauseAfter(assignPetTypeToProduct());
-                case 2 -> pauseAfter(removePetTypeFromProduct());
-                case 3 -> pauseAfter(viewPetTypesByProduct());
-                case 4 -> pauseAfter(viewProductsByPetType());
-                case 5 -> pauseAfter(checkRelationship());
+                case 1 -> CliViewUtility.pauseAfter(scanner, assignPetTypeToProduct());
+                case 2 -> CliViewUtility.pauseAfter(scanner, removePetTypeFromProduct());
+                case 3 -> CliViewUtility.pauseAfter(scanner, viewPetTypesByProduct());
+                case 4 -> CliViewUtility.pauseAfter(scanner, viewProductsByPetType());
+                case 5 -> CliViewUtility.pauseAfter(scanner, checkRelationship());
                 case 0 -> System.out.println("Returning to the development menu...");
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printMenu() {
-        showHeader("Product Pet Type Management");
+        CliViewUtility.showHeader("Product Pet Type Management");
         System.out.println("1. Assign Pet Type to Product");
         System.out.println("2. Remove Pet Type from Product");
         System.out.println("3. View Pet Types Assigned to a Product");
@@ -58,7 +60,7 @@ public class ProductPetTypeView {
     }
 
     private boolean assignPetTypeToProduct() {
-        showHeader("Assign Pet Type to Product");
+        CliViewUtility.showHeader("Assign Pet Type to Product");
 
         Product product = selectActiveProduct();
         if (product == null) {
@@ -79,8 +81,8 @@ public class ProductPetTypeView {
     }
 
     private boolean removePetTypeFromProduct() {
-        showHeader("Remove Pet Type from Product");
-        int productId = promptInt("Product ID (0 to cancel): ");
+        CliViewUtility.showHeader("Remove Pet Type from Product");
+        int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
         }
@@ -93,7 +95,7 @@ public class ProductPetTypeView {
         }
 
         printRelationships(relationships);
-        int petTypeId = promptInt("Pet type ID to remove (0 to cancel): ");
+        int petTypeId = InputUtility.readInt(scanner, "Pet type ID to remove (0 to cancel): ");
         if (petTypeId == 0) {
             return false;
         }
@@ -107,8 +109,8 @@ public class ProductPetTypeView {
     }
 
     private boolean viewPetTypesByProduct() {
-        showHeader("Pet Types Assigned to Product");
-        int productId = promptInt("Product ID (0 to cancel): ");
+        CliViewUtility.showHeader("Pet Types Assigned to Product");
+        int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
         }
@@ -120,8 +122,8 @@ public class ProductPetTypeView {
     }
 
     private boolean viewProductsByPetType() {
-        showHeader("Products Assigned to Pet Type");
-        int petTypeId = promptInt("Pet type ID (0 to cancel): ");
+        CliViewUtility.showHeader("Products Assigned to Pet Type");
+        int petTypeId = InputUtility.readInt(scanner, "Pet type ID (0 to cancel): ");
         if (petTypeId == 0) {
             return false;
         }
@@ -133,13 +135,13 @@ public class ProductPetTypeView {
     }
 
     private boolean checkRelationship() {
-        showHeader("Check Product-Pet Type Relationship");
-        int productId = promptInt("Product ID (0 to cancel): ");
+        CliViewUtility.showHeader("Check Product-Pet Type Relationship");
+        int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
         }
 
-        int petTypeId = promptInt("Pet type ID (0 to cancel): ");
+        int petTypeId = InputUtility.readInt(scanner, "Pet type ID (0 to cancel): ");
         if (petTypeId == 0) {
             return false;
         }
@@ -160,7 +162,7 @@ public class ProductPetTypeView {
 
         printProductChoices(products);
         while (true) {
-            int productId = promptInt("Product ID (0 to cancel): ");
+            int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
             if (productId == 0) {
                 return null;
             }
@@ -183,7 +185,7 @@ public class ProductPetTypeView {
 
         printPetTypeChoices(petTypes);
         while (true) {
-            int petTypeId = promptInt("Pet type ID (0 to cancel): ");
+            int petTypeId = InputUtility.readInt(scanner, "Pet type ID (0 to cancel): ");
             if (petTypeId == 0) {
                 return null;
             }
@@ -208,9 +210,9 @@ public class ProductPetTypeView {
         for (Product product : products) {
             System.out.printf("| %-4d | %-25s | %-20s | %-25s |%n",
                     product.getId(),
-                    truncate(product.getName(), 25),
-                    truncate(product.getBrand(), 20),
-                    truncate(product.getCategory().getName(), 25));
+                    CliViewUtility.truncate(product.getName(), 25),
+                    CliViewUtility.truncate(product.getBrand(), 20),
+                    CliViewUtility.truncate(product.getCategory().getName(), 25));
         }
         System.out.println(border);
     }
@@ -224,7 +226,7 @@ public class ProductPetTypeView {
         System.out.println(border);
         for (PetType petType : petTypes) {
             System.out.printf("| %-4d | %-35s |%n",
-                    petType.getId(), truncate(petType.getName(), 35));
+                    petType.getId(), CliViewUtility.truncate(petType.getName(), 35));
         }
         System.out.println(border);
     }
@@ -251,51 +253,14 @@ public class ProductPetTypeView {
             PetType petType = relationship.getPetType();
             System.out.printf("| %-4d | %-25s | %-20s | %-25s | %-25s | %-10s | %-10s |%n",
                     relationship.getId(),
-                    truncate(product.getName(), 25),
-                    truncate(product.getBrand(), 20),
-                    truncate(product.getCategory().getName(), 25),
-                    truncate(petType.getName(), 25),
-                    product.isArchived() ? "Archived" : "Active",
-                    petType.isArchived() ? "Archived" : "Active");
+                    CliViewUtility.truncate(product.getName(), 25),
+                    CliViewUtility.truncate(product.getBrand(), 20),
+                    CliViewUtility.truncate(product.getCategory().getName(), 25),
+                    CliViewUtility.truncate(petType.getName(), 25),
+                    CliViewUtility.formatArchiveStatus(product.isArchived()),
+                    CliViewUtility.formatArchiveStatus(petType.isArchived()));
         }
         System.out.println(border);
     }
 
-    private void pauseAfter(boolean shouldPause) {
-        if (shouldPause) {
-            pressEnterToContinue();
-        }
-    }
-
-    private int promptInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number.");
-            }
-        }
-    }
-
-    private void pressEnterToContinue() {
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    private void showHeader(String title) {
-        System.out.println();
-        System.out.println("=".repeat(72));
-        System.out.println(title);
-        System.out.println("=".repeat(72));
-    }
-
-    private String truncate(String value, int maxLength) {
-        if (value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
-    }
 }
