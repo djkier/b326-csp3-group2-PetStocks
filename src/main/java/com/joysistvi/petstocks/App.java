@@ -9,6 +9,7 @@ import com.joysistvi.petstocks.cliview.modelview.ProductView;
 import com.joysistvi.petstocks.cliview.modelview.RestockView;
 import com.joysistvi.petstocks.cliview.modelview.SupplierView;
 import com.joysistvi.petstocks.cliview.modelview.UserView;
+import com.joysistvi.petstocks.cliview.publicview.LoginView;
 import com.joysistvi.petstocks.config.DBConnection;
 import com.joysistvi.petstocks.controller.CategoryController;
 import com.joysistvi.petstocks.controller.DispatchController;
@@ -116,9 +117,24 @@ public class App {
             DispatchView dispatchView = new DispatchView(
                     dispatchController, inventoryController, productController, scanner);
             UserView userView = new UserView(userController, scanner);
+            LoginView loginView = new LoginView(scanner);
 
-            runDevelopmentMenu(scanner, petTypeView, categoryView, supplierView, productView,
-                    productPetTypeView, inventoryView, restockView, dispatchView, userView);
+            runLoginMenu(loginView);
+        }
+    }
+
+    private static void runLoginMenu(LoginView loginView) {
+        while (true) {
+            LoginView.Selection selection = loginView.promptForSelection();
+
+            switch (selection) {
+                case STAFF -> System.out.println("Staff workflow selected.");
+                case ADMIN -> System.out.println("Administrator workflow selected.");
+                case EXIT -> {
+                    System.out.println("Exiting PetStock...");
+                    return;
+                }
+            }
         }
     }
 
