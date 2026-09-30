@@ -16,6 +16,10 @@ public class PetTypeController {
         return petTypeService.getAllPetTypes();
     }
 
+    public List<PetType> handleViewAllPetTypes(String sortBy) {
+        return petTypeService.getAllPetTypes(sortBy);
+    }
+
     public PetType handleGetPetTypeById(int id) {
         return petTypeService.getPetTypeById(id);
     }
@@ -46,5 +50,9 @@ public class PetTypeController {
 
     public List<PetType> handleViewArchivedPetTypes() {
         return petTypeService.getAllArchivedPetTypes();
+    }
+
+    public List<PetType> handleViewArchivedPetTypes(String sortBy) {
+        return petTypeService.getAllArchivedPetTypes(sortBy);
     }
 }

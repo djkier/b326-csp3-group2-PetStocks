@@ -17,7 +17,12 @@ public class PetTypeServiceImpl implements PetTypeService {
 
     @Override
     public List<PetType> getAllPetTypes() {
-        return petTypeRepo.getAllPetTypes();
+        return getAllPetTypes("id");
+    }
+
+    @Override
+    public List<PetType> getAllPetTypes(String sortBy) {
+        return petTypeRepo.getAllPetTypes(getApprovedSortValue(sortBy));
     }
 
     @Override
@@ -80,7 +85,16 @@ public class PetTypeServiceImpl implements PetTypeService {
 
     @Override
     public List<PetType> getAllArchivedPetTypes() {
-        return petTypeRepo.getAllArchivedPetTypes();
+        return getAllArchivedPetTypes("id");
+    }
+
+    @Override
+    public List<PetType> getAllArchivedPetTypes(String sortBy) {
+        return petTypeRepo.getAllArchivedPetTypes(getApprovedSortValue(sortBy));
+    }
+
+    private String getApprovedSortValue(String sortBy) {
+        return "name".equals(sortBy) ? "name" : "id";
     }
 
     private boolean validatePetType(PetType petType, boolean requireId) {
