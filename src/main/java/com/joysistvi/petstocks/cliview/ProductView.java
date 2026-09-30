@@ -4,6 +4,8 @@ import com.joysistvi.petstocks.controller.CategoryController;
 import com.joysistvi.petstocks.controller.ProductController;
 import com.joysistvi.petstocks.model.Category;
 import com.joysistvi.petstocks.model.Product;
+import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.List;
 import java.util.Scanner;
@@ -30,29 +32,29 @@ public class ProductView {
 
         do {
             printMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> viewAllProducts();
-                case 2 -> pauseAfter(findProductById());
+                case 2 -> CliViewUtility.pauseAfter(scanner, findProductById());
                 case 3 -> {
                     searchProducts();
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
-                case 4 -> pauseAfter(createProduct());
-                case 5 -> pauseAfter(updateProduct());
+                case 4 -> CliViewUtility.pauseAfter(scanner, createProduct());
+                case 5 -> CliViewUtility.pauseAfter(scanner, updateProduct());
                 case 6 -> runArchiveAndDeleteMenu();
                 case 0 -> System.out.println("Returning to the development menu...");
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printMenu() {
-        showHeader("Product Management");
+        CliViewUtility.showHeader("Product Management");
         System.out.println("1. View All Active Products");
         System.out.println("2. Find Product by ID");
         System.out.println("3. Search Products");
@@ -67,10 +69,10 @@ public class ProductView {
         int choice;
 
         do {
-            showHeader("Active Products");
+            CliViewUtility.showHeader("Active Products");
             printProducts(productController.handleViewAllProducts(sortBy));
             printSortOptions();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "id";
@@ -82,8 +84,8 @@ public class ProductView {
     }
 
     private boolean findProductById() {
-        showHeader("Find Product By ID");
-        int id = promptInt("Product ID (0 to cancel): ");
+        CliViewUtility.showHeader("Find Product By ID");
+        int id = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -96,14 +98,14 @@ public class ProductView {
     }
 
     private void searchProducts() {
-        showHeader("Search Products");
+        CliViewUtility.showHeader("Search Products");
         System.out.print("Enter product name, brand, description, or category: ");
         String keyword = scanner.nextLine();
         printProducts(productController.searchProducts(keyword));
     }
 
     private boolean createProduct() {
-        showHeader("Create Product");
+        CliViewUtility.showHeader("Create Product");
         System.out.print("Name: ");
         String name = scanner.nextLine();
         System.out.print("Brand: ");
@@ -130,10 +132,10 @@ public class ProductView {
     }
 
     private boolean updateProduct() {
-        showHeader("Update Product");
+        CliViewUtility.showHeader("Update Product");
         printProducts(productController.handleViewAllProducts("id"));
 
-        int id = promptInt("Product ID to update (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Product ID to update (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -148,10 +150,10 @@ public class ProductView {
         }
 
         System.out.print("New name [" + current.getName() + "] (Enter to keep): ");
-        String name = keepCurrentIfBlank(scanner.nextLine(), current.getName());
+        String name = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getName());
 
         System.out.print("New brand [" + current.getBrand() + "] (Enter to keep): ");
-        String brand = keepCurrentIfBlank(scanner.nextLine(), current.getBrand());
+        String brand = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getBrand());
 
         String currentDescription = current.getDescription() == null
                 ? "" : current.getDescription();
@@ -180,9 +182,9 @@ public class ProductView {
     }
 
     private boolean archiveProduct() {
-        showHeader("Archive Product");
+        CliViewUtility.showHeader("Archive Product");
         printProducts(productController.handleViewAllProducts("id"));
-        int id = promptInt("Product ID to archive (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Product ID to archive (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -195,9 +197,9 @@ public class ProductView {
     }
 
     private boolean restoreProduct() {
-        showHeader("Restore Product");
+        CliViewUtility.showHeader("Restore Product");
         printProducts(productController.handleViewArchivedProducts("id"));
-        int id = promptInt("Product ID to restore (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Product ID to restore (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -214,10 +216,10 @@ public class ProductView {
         int choice;
 
         do {
-            showHeader("Archived Products");
+            CliViewUtility.showHeader("Archived Products");
             printProducts(productController.handleViewArchivedProducts(sortBy));
             printSortOptions();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "id";
@@ -229,15 +231,14 @@ public class ProductView {
     }
 
     private boolean deleteProduct() {
-        showHeader("Delete Archived Product");
+        CliViewUtility.showHeader("Delete Archived Product");
         printProducts(productController.handleViewArchivedProducts("id"));
-        int id = promptInt("Archived product ID to delete permanently (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Archived product ID to delete permanently (0 to cancel): ");
         if (id == 0) {
             return false;
         }
 
-        System.out.print("This cannot be undone. Type DELETE to confirm: ");
-        if (!"DELETE".equals(scanner.nextLine())) {
+        if (!CliViewUtility.confirmExact(scanner, "This cannot be undone. Type DELETE to confirm: ", "DELETE")) {
             System.out.println("Delete cancelled.");
             return true;
         }
@@ -254,24 +255,24 @@ public class ProductView {
 
         do {
             printArchiveAndDeleteMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
-                case 1 -> pauseAfter(archiveProduct());
-                case 2 -> pauseAfter(restoreProduct());
+                case 1 -> CliViewUtility.pauseAfter(scanner, archiveProduct());
+                case 2 -> CliViewUtility.pauseAfter(scanner, restoreProduct());
                 case 3 -> viewAllArchivedProducts();
-                case 4 -> pauseAfter(deleteProduct());
+                case 4 -> CliViewUtility.pauseAfter(scanner, deleteProduct());
                 case 0 -> { }
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printArchiveAndDeleteMenu() {
-        showHeader("Archiving / Deleting Products");
+        CliViewUtility.showHeader("Archiving / Deleting Products");
         System.out.println("1. Archive Product");
         System.out.println("2. Restore Product");
         System.out.println("3. View Archived Products");
@@ -341,7 +342,7 @@ public class ProductView {
         System.out.println(border);
         for (Category category : categories) {
             System.out.printf("| %-4d | %-35s |%n",
-                    category.getId(), truncate(category.getName(), 35));
+                    category.getId(), CliViewUtility.truncate(category.getName(), 35));
         }
         System.out.println(border);
     }
@@ -349,12 +350,6 @@ public class ProductView {
     private void printSortOptions() {
         System.out.println();
         System.out.println("Sort by: [1] ID        [2] Name        [0] Back");
-    }
-
-    private void pauseAfter(boolean shouldPause) {
-        if (shouldPause) {
-            pressEnterToContinue();
-        }
     }
 
     public void printProducts(List<Product> products) {
@@ -376,52 +371,17 @@ public class ProductView {
         for (Product product : products) {
             String description = product.getDescription() == null ? "" : product.getDescription();
             String categoryName = product.getCategory() == null ? "" : product.getCategory().getName();
-            String status = product.isArchived() ? "Archived" : "Active";
+            String status = CliViewUtility.formatArchiveStatus(product.isArchived());
             System.out.printf("| %-4d | %-25s | %-20s | %-40s | %-25s | %-10s |%n",
                     product.getId(),
-                    truncate(product.getName(), NAME_DISPLAY_WIDTH),
-                    truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
-                    truncate(description, DESCRIPTION_DISPLAY_WIDTH),
-                    truncate(categoryName, CATEGORY_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(product.getName(), NAME_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(description, DESCRIPTION_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(categoryName, CATEGORY_DISPLAY_WIDTH),
                     status);
         }
 
         System.out.println(border);
     }
 
-    private String keepCurrentIfBlank(String value, String currentValue) {
-        return value.trim().isEmpty() ? currentValue : value;
-    }
-
-    private int promptInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number.");
-            }
-        }
-    }
-
-    private void pressEnterToContinue() {
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    private void showHeader(String title) {
-        System.out.println();
-        System.out.println("=".repeat(72));
-        System.out.println(title);
-        System.out.println("=".repeat(72));
-    }
-
-    private String truncate(String value, int maxLength) {
-        if (value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
-    }
 }

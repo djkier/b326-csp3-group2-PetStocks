@@ -2,6 +2,8 @@ package com.joysistvi.petstocks.cliview;
 
 import com.joysistvi.petstocks.controller.CategoryController;
 import com.joysistvi.petstocks.model.Category;
+import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.List;
 import java.util.Scanner;
@@ -22,32 +24,32 @@ public class CategoryView {
 
         do {
             printMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> viewAllCategories();
-                case 2 -> pauseAfter(findCategoryById());
+                case 2 -> CliViewUtility.pauseAfter(scanner, findCategoryById());
                 case 3 -> {
                     searchCategories();
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
                 case 4 -> {
                     createCategory();
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
-                case 5 -> pauseAfter(updateCategory());
+                case 5 -> CliViewUtility.pauseAfter(scanner, updateCategory());
                 case 6 -> runArchiveAndDeleteMenu();
                 case 0 -> System.out.println("Returning to the development menu...");
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printMenu() {
-        showHeader("Category Management");
+        CliViewUtility.showHeader("Category Management");
         System.out.println("1. View All Active Categories");
         System.out.println("2. Find Category by ID");
         System.out.println("3. Search Categories");
@@ -62,10 +64,10 @@ public class CategoryView {
         int choice;
 
         do {
-            showHeader("Active Categories");
+            CliViewUtility.showHeader("Active Categories");
             printCategories(categoryController.handleViewAllCategories(sortBy));
             printSortOptions();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "id";
@@ -77,8 +79,8 @@ public class CategoryView {
     }
 
     private boolean findCategoryById() {
-        showHeader("Find Category By ID");
-        int id = promptInt("Category ID (0 to cancel): ");
+        CliViewUtility.showHeader("Find Category By ID");
+        int id = InputUtility.readInt(scanner, "Category ID (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -92,14 +94,14 @@ public class CategoryView {
     }
 
     private void searchCategories() {
-        showHeader("Search Categories");
+        CliViewUtility.showHeader("Search Categories");
         System.out.print("Enter name or description: ");
         String keyword = scanner.nextLine();
         printCategories(categoryController.searchCategories(keyword));
     }
 
     private void createCategory() {
-        showHeader("Create Category");
+        CliViewUtility.showHeader("Create Category");
         System.out.print("Name: ");
         String name = scanner.nextLine();
         System.out.print("Description (optional): ");
@@ -118,10 +120,10 @@ public class CategoryView {
     }
 
     private boolean updateCategory() {
-        showHeader("Update Category");
+        CliViewUtility.showHeader("Update Category");
         printCategories(categoryController.handleViewAllCategories("id"));
 
-        int id = promptInt("Category ID to update (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Category ID to update (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -164,9 +166,9 @@ public class CategoryView {
     }
 
     private boolean archiveCategory() {
-        showHeader("Archive Category");
+        CliViewUtility.showHeader("Archive Category");
         printCategories(categoryController.handleViewAllCategories("id"));
-        int id = promptInt("Category ID to archive (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Category ID to archive (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -179,9 +181,9 @@ public class CategoryView {
     }
 
     private boolean restoreCategory() {
-        showHeader("Restore Category");
+        CliViewUtility.showHeader("Restore Category");
         printCategories(categoryController.handleViewArchivedCategories("id"));
-        int id = promptInt("Category ID to restore (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Category ID to restore (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -198,10 +200,10 @@ public class CategoryView {
         int choice;
 
         do {
-            showHeader("Archived Categories");
+            CliViewUtility.showHeader("Archived Categories");
             printCategories(categoryController.handleViewArchivedCategories(sortBy));
             printSortOptions();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "id";
@@ -213,15 +215,14 @@ public class CategoryView {
     }
 
     private boolean deleteCategory() {
-        showHeader("Delete Archived Category");
+        CliViewUtility.showHeader("Delete Archived Category");
         printCategories(categoryController.handleViewArchivedCategories("id"));
-        int id = promptInt("Archived category ID to delete permanently (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Archived category ID to delete permanently (0 to cancel): ");
         if (id == 0) {
             return false;
         }
 
-        System.out.print("This cannot be undone. Type DELETE to confirm: ");
-        if (!"DELETE".equals(scanner.nextLine())) {
+        if (!CliViewUtility.confirmExact(scanner, "This cannot be undone. Type DELETE to confirm: ", "DELETE")) {
             System.out.println("Delete cancelled.");
             return true;
         }
@@ -238,24 +239,24 @@ public class CategoryView {
 
         do {
             printArchiveAndDeleteMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
-                case 1 -> pauseAfter(archiveCategory());
-                case 2 -> pauseAfter(restoreCategory());
+                case 1 -> CliViewUtility.pauseAfter(scanner, archiveCategory());
+                case 2 -> CliViewUtility.pauseAfter(scanner, restoreCategory());
                 case 3 -> viewAllArchivedCategories();
-                case 4 -> pauseAfter(deleteCategory());
+                case 4 -> CliViewUtility.pauseAfter(scanner, deleteCategory());
                 case 0 -> { }
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printArchiveAndDeleteMenu() {
-        showHeader("Archiving / Deleting Categories");
+        CliViewUtility.showHeader("Archiving / Deleting Categories");
         System.out.println("1. Archive Category");
         System.out.println("2. Restore Category");
         System.out.println("3. View Archived Categories");
@@ -266,12 +267,6 @@ public class CategoryView {
     private void printSortOptions() {
         System.out.println();
         System.out.println("Sort by: [1] ID        [2] Name        [0] Back");
-    }
-
-    private void pauseAfter(boolean shouldPause) {
-        if (shouldPause) {
-            pressEnterToContinue();
-        }
     }
 
     public void printCategories(List<Category> categories) {
@@ -290,44 +285,13 @@ public class CategoryView {
 
         for (Category category : categories) {
             String description = category.getDescription() == null
-                    ? "" : truncate(category.getDescription(), DESCRIPTION_DISPLAY_WIDTH);
-            String status = category.isArchived() ? "Archived" : "Active";
+                    ? "" : CliViewUtility.truncate(category.getDescription(), DESCRIPTION_DISPLAY_WIDTH);
+            String status = CliViewUtility.formatArchiveStatus(category.isArchived());
             System.out.printf("| %-4d | %-25s | %-50s | %-10s |%n",
-                    category.getId(), truncate(category.getName(), 25), description, status);
+                    category.getId(), CliViewUtility.truncate(category.getName(), 25), description, status);
         }
 
         System.out.println(border);
     }
 
-    private int promptInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number.");
-            }
-        }
-    }
-
-    private void pressEnterToContinue() {
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    private void showHeader(String title) {
-        System.out.println();
-        System.out.println("=".repeat(72));
-        System.out.println(title);
-        System.out.println("=".repeat(72));
-    }
-
-    private String truncate(String value, int maxLength) {
-        if (value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
-    }
 }
