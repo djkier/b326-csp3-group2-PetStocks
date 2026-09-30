@@ -19,6 +19,19 @@ public class InputUtility {
         }
     }
 
+    public static int readInt(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid whole number.");
+            }
+        }
+    }
+
     public static int readOptionalInt(Scanner scanner, int currentValue) {
         while (true) {
             String input = scanner.nextLine();
@@ -32,6 +45,22 @@ public class InputUtility {
                 displayError("Please enter a valid number or press Enter to keep the current value.");
                 pressEnterToContinue(scanner);
                 System.out.print("Enter a number or press Enter to keep the current value: ");
+            }
+        }
+    }
+
+    public static int readOptionalInt(Scanner scanner, String prompt, int currentValue) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                return currentValue;
+            }
+
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid whole number or press Enter to keep.");
             }
         }
     }
@@ -51,6 +80,11 @@ public class InputUtility {
 
     public static void pressEnterToContinue(Scanner scanner) {
         System.out.println("\nPress Enter to continue...");
+        scanner.nextLine();
+    }
+
+    public static void pressEnterToContinue(Scanner scanner, String prompt) {
+        System.out.print(prompt);
         scanner.nextLine();
     }
 }
