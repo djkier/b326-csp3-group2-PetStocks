@@ -11,11 +11,15 @@ import java.util.List;
 import java.util.Scanner;
 
 public class InventoryView {
-    private static final int PRODUCT_DISPLAY_WIDTH = 25;
-    private static final int BRAND_DISPLAY_WIDTH = 18;
-    private static final int CATEGORY_DISPLAY_WIDTH = 20;
-    private static final int BATCH_DISPLAY_WIDTH = 20;
-    private static final int REMARK_DISPLAY_WIDTH = 30;
+    private static final int ID_DISPLAY_WIDTH = 4;
+    private static final int PRODUCT_DISPLAY_WIDTH = 20;
+    private static final int BRAND_DISPLAY_WIDTH = 12;
+    private static final int CATEGORY_DISPLAY_WIDTH = 18;
+    private static final int QUANTITY_DISPLAY_WIDTH = 8;
+    private static final int EXPIRATION_DISPLAY_WIDTH = 12;
+    private static final int BATCH_DISPLAY_WIDTH = 14;
+    private static final int REMARK_DISPLAY_WIDTH = 20;
+    private static final int STATUS_DISPLAY_WIDTH = 10;
 
     private final InventoryController inventoryController;
     private final ProductController productController;
@@ -324,33 +328,40 @@ public class InventoryView {
             return;
         }
 
-        String border = "+" + "-".repeat(6) + "+" + "-".repeat(PRODUCT_DISPLAY_WIDTH + 2)
+        String border = "+" + "-".repeat(ID_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(PRODUCT_DISPLAY_WIDTH + 2)
                 + "+" + "-".repeat(BRAND_DISPLAY_WIDTH + 2)
-                + "+" + "-".repeat(CATEGORY_DISPLAY_WIDTH + 2) + "+" + "-".repeat(10)
-                + "+" + "-".repeat(12) + "+" + "-".repeat(BATCH_DISPLAY_WIDTH + 2)
-                + "+" + "-".repeat(REMARK_DISPLAY_WIDTH + 2) + "+" + "-".repeat(12) + "+";
+                + "+" + "-".repeat(CATEGORY_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(QUANTITY_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(EXPIRATION_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(BATCH_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(REMARK_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(STATUS_DISPLAY_WIDTH + 2) + "+";
+
+        String rowFormat = "| %-" + ID_DISPLAY_WIDTH + "s | %-"
+                + PRODUCT_DISPLAY_WIDTH + "s | %-" + BRAND_DISPLAY_WIDTH + "s | %-"
+                + CATEGORY_DISPLAY_WIDTH + "s | %-" + QUANTITY_DISPLAY_WIDTH + "s | %-"
+                + EXPIRATION_DISPLAY_WIDTH + "s | %-" + BATCH_DISPLAY_WIDTH + "s | %-"
+                + REMARK_DISPLAY_WIDTH + "s | %-" + STATUS_DISPLAY_WIDTH + "s |%n";
 
         System.out.println(border);
-        System.out.printf("| %-4s | %-25s | %-18s | %-20s | %-8s | %-10s | %-20s | %-30s | %-10s |%n",
+        System.out.printf(rowFormat,
                 "ID", "Product", "Brand", "Category", "Quantity", "Expiration",
-                "Batch Code", "Remark", "Product");
-        System.out.printf("| %-4s | %-25s | %-18s | %-20s | %-8s | %-10s | %-20s | %-30s | %-10s |%n",
-                "", "", "", "", "", "", "", "", "Status");
+                "Batch Code", "Remark", "Status");
         System.out.println(border);
 
         for (Inventory item : inventory) {
             Product product = item.getProduct();
-            String remark = item.getRemark() == null ? "" : item.getRemark();
             String expiration = formatExpiration(item.getExpiration());
-            System.out.printf("| %-4d | %-25s | %-18s | %-20s | %-8d | %-10s | %-20s | %-30s | %-10s |%n",
+            System.out.printf(rowFormat,
                     item.getId(),
                     truncate(product.getName(), PRODUCT_DISPLAY_WIDTH),
                     truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
                     truncate(product.getCategory().getName(), CATEGORY_DISPLAY_WIDTH),
                     item.getQuantity(),
-                    expiration,
+                    truncate(expiration, EXPIRATION_DISPLAY_WIDTH),
                     truncate(item.getBatchCode(), BATCH_DISPLAY_WIDTH),
-                    truncate(remark, REMARK_DISPLAY_WIDTH),
+                    truncate(item.getRemark(), REMARK_DISPLAY_WIDTH),
                     product.isArchived() ? "Archived" : "Active");
         }
         System.out.println(border);
@@ -446,6 +457,9 @@ public class InventoryView {
     }
 
     private String truncate(String value, int maxLength) {
+        if (value == null) {
+            return "";
+        }
         if (value.length() <= maxLength) {
             return value;
         }
