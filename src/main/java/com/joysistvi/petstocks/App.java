@@ -1,26 +1,25 @@
 package com.joysistvi.petstocks;
 
+import com.joysistvi.petstocks.cliview.PetTypeView;
 import com.joysistvi.petstocks.config.DBConnection;
+import com.joysistvi.petstocks.controller.PetTypeController;
+import com.joysistvi.petstocks.repository.PetTypeRepo;
+import com.joysistvi.petstocks.repository.PetTypeRepoImpl;
+import com.joysistvi.petstocks.service.PetTypeService;
+import com.joysistvi.petstocks.service.PetTypeServiceImpl;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
-        System.out.println("Hello Group 2!!!");
-
         DBConnection dbConnection = new DBConnection();
+        PetTypeRepo petTypeRepo = new PetTypeRepoImpl(dbConnection);
+        PetTypeService petTypeService = new PetTypeServiceImpl(petTypeRepo);
+        PetTypeController petTypeController = new PetTypeController(petTypeService);
 
-        try (Connection connection = dbConnection.getConnection()) {
-
-            if (connection != null && !connection.isClosed()) {
-                System.out.println("Database connection successful!");
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Database connection failed.");
-            System.out.println("Error: " + e.getMessage());
+        try (Scanner scanner = new Scanner(System.in)) {
+            PetTypeView petTypeView = new PetTypeView(petTypeController, scanner);
+            petTypeView.run();
         }
-
     }
 }
