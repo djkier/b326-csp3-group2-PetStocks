@@ -29,6 +29,10 @@ public final class CliViewUtility {
         return value.trim().isEmpty() ? currentValue : value;
     }
 
+    public static String formatArchiveStatus(boolean isArchived) {
+        return isArchived ? "Archived" : "Active";
+    }
+
     public static void pauseAfter(Scanner scanner, boolean shouldPause) {
         if (shouldPause) {
             InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
