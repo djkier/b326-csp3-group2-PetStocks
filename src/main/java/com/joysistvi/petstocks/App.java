@@ -1,6 +1,7 @@
 package com.joysistvi.petstocks;
 
 import com.joysistvi.petstocks.cliview.CategoryView;
+import com.joysistvi.petstocks.cliview.DispatchView;
 import com.joysistvi.petstocks.cliview.InventoryView;
 import com.joysistvi.petstocks.cliview.PetTypeView;
 import com.joysistvi.petstocks.cliview.ProductPetTypeView;
@@ -9,6 +10,7 @@ import com.joysistvi.petstocks.cliview.RestockView;
 import com.joysistvi.petstocks.cliview.SupplierView;
 import com.joysistvi.petstocks.config.DBConnection;
 import com.joysistvi.petstocks.controller.CategoryController;
+import com.joysistvi.petstocks.controller.DispatchController;
 import com.joysistvi.petstocks.controller.InventoryController;
 import com.joysistvi.petstocks.controller.PetTypeController;
 import com.joysistvi.petstocks.controller.ProductPetTypeController;
@@ -17,6 +19,8 @@ import com.joysistvi.petstocks.controller.RestockController;
 import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.repository.CategoryRepo;
 import com.joysistvi.petstocks.repository.CategoryRepoImpl;
+import com.joysistvi.petstocks.repository.DispatchRepo;
+import com.joysistvi.petstocks.repository.DispatchRepoImpl;
 import com.joysistvi.petstocks.repository.InventoryRepo;
 import com.joysistvi.petstocks.repository.InventoryRepoImpl;
 import com.joysistvi.petstocks.repository.PetTypeRepo;
@@ -31,6 +35,8 @@ import com.joysistvi.petstocks.repository.SupplierRepo;
 import com.joysistvi.petstocks.repository.SupplierRepoImpl;
 import com.joysistvi.petstocks.service.CategoryService;
 import com.joysistvi.petstocks.service.CategoryServiceImpl;
+import com.joysistvi.petstocks.service.DispatchService;
+import com.joysistvi.petstocks.service.DispatchServiceImpl;
 import com.joysistvi.petstocks.service.InventoryService;
 import com.joysistvi.petstocks.service.InventoryServiceImpl;
 import com.joysistvi.petstocks.service.PetTypeService;
@@ -81,6 +87,11 @@ public class App {
                 restockRepo, inventoryRepo, supplierRepo);
         RestockController restockController = new RestockController(restockService);
 
+        DispatchRepo dispatchRepo = new DispatchRepoImpl(dbConnection);
+        DispatchService dispatchService = new DispatchServiceImpl(
+                dispatchRepo, inventoryRepo, productRepo);
+        DispatchController dispatchController = new DispatchController(dispatchService);
+
         try (Scanner scanner = new Scanner(System.in)) {
             PetTypeView petTypeView = new PetTypeView(petTypeController, scanner);
             CategoryView categoryView = new CategoryView(categoryController, scanner);
@@ -92,9 +103,11 @@ public class App {
                     inventoryController, productController, scanner);
             RestockView restockView = new RestockView(
                     restockController, inventoryController, supplierController, scanner);
+            DispatchView dispatchView = new DispatchView(
+                    dispatchController, inventoryController, productController, scanner);
 
             runDevelopmentMenu(scanner, petTypeView, categoryView, supplierView, productView,
-                    productPetTypeView, inventoryView, restockView);
+                    productPetTypeView, inventoryView, restockView, dispatchView);
         }
     }
 
@@ -103,7 +116,8 @@ public class App {
                                            ProductView productView,
                                            ProductPetTypeView productPetTypeView,
                                            InventoryView inventoryView,
-                                           RestockView restockView) {
+                                           RestockView restockView,
+                                           DispatchView dispatchView) {
         int choice;
 
         do {
@@ -118,6 +132,7 @@ public class App {
             System.out.println("5. Test Product Pet Type MVC");
             System.out.println("6. Test Inventory MVC");
             System.out.println("7. Test Restock MVC");
+            System.out.println("8. Test Dispatch MVC");
             System.out.println("0. Exit");
             choice = promptInt(scanner, "Choice: ");
 
@@ -129,6 +144,7 @@ public class App {
                 case 5 -> productPetTypeView.run();
                 case 6 -> inventoryView.run();
                 case 7 -> restockView.run();
+                case 8 -> dispatchView.run();
                 case 0 -> System.out.println("Exiting PetStock...");
                 default -> System.out.println("Invalid menu selection.");
             }
