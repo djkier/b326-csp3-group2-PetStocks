@@ -2,7 +2,7 @@ package com.joysistvi.petstocks.service;
 
 import com.joysistvi.petstocks.model.User;
 import com.joysistvi.petstocks.repository.UserRepo;
-import org.mindrot.jbcrypt.BCrypt;
+import com.joysistvi.petstocks.utility.PasswordUtility;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
         user.setUsername(username);
         user.setRole(role);
-        user.setPasswordHash(hashPassword(plainPassword));
+        user.setPasswordHash(PasswordUtility.hashPassword(plainPassword));
         return userRepo.createUser(user);
     }
 
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
         if (!validatePassword(plainPassword)) {
             return false;
         }
-        return userRepo.updatePasswordHash(id, hashPassword(plainPassword));
+        return userRepo.updatePasswordHash(id, PasswordUtility.hashPassword(plainPassword));
     }
 
     private boolean validateUsername(String username) {
@@ -169,10 +169,6 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         return normalizedRole;
-    }
-
-    private String hashPassword(String plainPassword) {
-        return BCrypt.hashpw(plainPassword, BCrypt.gensalt());
     }
 
     private String getApprovedSortValue(String sortBy) {
