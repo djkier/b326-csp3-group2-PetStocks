@@ -1,4 +1,4 @@
-package com.joysistvi.petstocks.cliview;
+package com.joysistvi.petstocks.cliview.modelview;
 
 import com.joysistvi.petstocks.controller.UserController;
 import com.joysistvi.petstocks.model.User;
