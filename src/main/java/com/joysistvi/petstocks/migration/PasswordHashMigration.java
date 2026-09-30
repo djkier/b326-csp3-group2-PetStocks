@@ -13,6 +13,7 @@ import java.util.List;
 
 public final class PasswordHashMigration {
     private static final String RUN_ARGUMENT = "--run";
+    private static final String VERIFY_ARGUMENT = "--verify";
 
     private final DBConnection dbConnection;
 
@@ -21,13 +22,26 @@ public final class PasswordHashMigration {
     }
 
     public static void main(String[] args) {
-        if (args.length != 1 || !RUN_ARGUMENT.equals(args[0])) {
-            System.out.println("Password migration was not run. Use --run to execute it explicitly.");
+        if (args.length != 1
+                || (!RUN_ARGUMENT.equals(args[0]) && !VERIFY_ARGUMENT.equals(args[0]))) {
+            System.out.println("Use --run to migrate or --verify for a read-only check.");
             return;
         }
 
         PasswordHashMigration migration = new PasswordHashMigration(new DBConnection());
         try {
+            if (VERIFY_ARGUMENT.equals(args[0])) {
+                VerificationResult verification = migration.verify();
+                System.out.println("Users verified: " + verification.usersScanned());
+                System.out.println("Unhashed passwords: " + verification.unhashedPasswords());
+                if (!verification.allPasswordsHashed()) {
+                    System.err.println("Verification failed: unhashed passwords remain.");
+                    System.exit(1);
+                }
+                System.out.println("Verification passed: all stored passwords use BCrypt.");
+                return;
+            }
+
             MigrationResult result = migration.migrate();
             System.out.println("Password migration completed.");
             System.out.println("Users scanned: " + result.usersScanned());
@@ -74,7 +88,10 @@ public final class PasswordHashMigration {
                     }
                 }
 
-                verifyAllPasswordsAreHashed(conn);
+                VerificationResult verification = verifyAllPasswordsAreHashed(conn);
+                if (!verification.allPasswordsHashed()) {
+                    throw new SQLException("Verification found unhashed passwords.");
+                }
                 conn.commit();
             } catch (SQLException | RuntimeException e) {
                 rollback(conn);
@@ -86,6 +103,12 @@ public final class PasswordHashMigration {
         }
 
         return new MigrationResult(usersScanned, passwordsMigrated, alreadyHashed);
+    }
+
+    public VerificationResult verify() throws SQLException {
+        try (Connection conn = dbConnection.getConnection()) {
+            return verifyAllPasswordsAreHashed(conn);
+        }
     }
 
     private List<StoredPassword> readAndLockPasswords(Connection conn) throws SQLException {
@@ -102,7 +125,7 @@ public final class PasswordHashMigration {
         return storedPasswords;
     }
 
-    private void verifyAllPasswordsAreHashed(Connection conn) throws SQLException {
+    private VerificationResult verifyAllPasswordsAreHashed(Connection conn) throws SQLException {
         int usersScanned = 0;
         int unhashedPasswords = 0;
         String query = "SELECT password_hash FROM users";
@@ -117,10 +140,7 @@ public final class PasswordHashMigration {
             }
         }
 
-        if (unhashedPasswords > 0) {
-            throw new SQLException("Verification found unhashed passwords among " +
-                    usersScanned + " users.");
-        }
+        return new VerificationResult(usersScanned, unhashedPasswords);
     }
 
     private void rollback(Connection conn) {
@@ -132,6 +152,12 @@ public final class PasswordHashMigration {
     }
 
     public record MigrationResult(int usersScanned, int passwordsMigrated, int alreadyHashed) {
+    }
+
+    public record VerificationResult(int usersScanned, int unhashedPasswords) {
+        public boolean allPasswordsHashed() {
+            return unhashedPasswords == 0;
+        }
     }
 
     private record StoredPassword(int userId, String value) {
