@@ -2,21 +2,27 @@ package com.joysistvi.petstocks;
 
 import com.joysistvi.petstocks.cliview.CategoryView;
 import com.joysistvi.petstocks.cliview.PetTypeView;
+import com.joysistvi.petstocks.cliview.ProductView;
 import com.joysistvi.petstocks.cliview.SupplierView;
 import com.joysistvi.petstocks.config.DBConnection;
 import com.joysistvi.petstocks.controller.CategoryController;
 import com.joysistvi.petstocks.controller.PetTypeController;
+import com.joysistvi.petstocks.controller.ProductController;
 import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.repository.CategoryRepo;
 import com.joysistvi.petstocks.repository.CategoryRepoImpl;
 import com.joysistvi.petstocks.repository.PetTypeRepo;
 import com.joysistvi.petstocks.repository.PetTypeRepoImpl;
+import com.joysistvi.petstocks.repository.ProductRepo;
+import com.joysistvi.petstocks.repository.ProductRepoImpl;
 import com.joysistvi.petstocks.repository.SupplierRepo;
 import com.joysistvi.petstocks.repository.SupplierRepoImpl;
 import com.joysistvi.petstocks.service.CategoryService;
 import com.joysistvi.petstocks.service.CategoryServiceImpl;
 import com.joysistvi.petstocks.service.PetTypeService;
 import com.joysistvi.petstocks.service.PetTypeServiceImpl;
+import com.joysistvi.petstocks.service.ProductService;
+import com.joysistvi.petstocks.service.ProductServiceImpl;
 import com.joysistvi.petstocks.service.SupplierService;
 import com.joysistvi.petstocks.service.SupplierServiceImpl;
 
@@ -38,17 +44,23 @@ public class App {
         SupplierService supplierService = new SupplierServiceImpl(supplierRepo);
         SupplierController supplierController = new SupplierController(supplierService);
 
+        ProductRepo productRepo = new ProductRepoImpl(dbConnection);
+        ProductService productService = new ProductServiceImpl(productRepo, categoryRepo);
+        ProductController productController = new ProductController(productService);
+
         try (Scanner scanner = new Scanner(System.in)) {
             PetTypeView petTypeView = new PetTypeView(petTypeController, scanner);
             CategoryView categoryView = new CategoryView(categoryController, scanner);
             SupplierView supplierView = new SupplierView(supplierController, scanner);
+            ProductView productView = new ProductView(productController, categoryController, scanner);
 
-            runDevelopmentMenu(scanner, petTypeView, categoryView, supplierView);
+            runDevelopmentMenu(scanner, petTypeView, categoryView, supplierView, productView);
         }
     }
 
     private static void runDevelopmentMenu(Scanner scanner, PetTypeView petTypeView,
-                                           CategoryView categoryView, SupplierView supplierView) {
+                                           CategoryView categoryView, SupplierView supplierView,
+                                           ProductView productView) {
         int choice;
 
         do {
@@ -59,6 +71,7 @@ public class App {
             System.out.println("1. Test Pet Type MVC");
             System.out.println("2. Test Category MVC");
             System.out.println("3. Test Supplier MVC");
+            System.out.println("4. Test Product MVC");
             System.out.println("0. Exit");
             choice = promptInt(scanner, "Choice: ");
 
@@ -66,6 +79,7 @@ public class App {
                 case 1 -> petTypeView.run();
                 case 2 -> categoryView.run();
                 case 3 -> supplierView.run();
+                case 4 -> productView.run();
                 case 0 -> System.out.println("Exiting PetStock...");
                 default -> System.out.println("Invalid menu selection.");
             }
