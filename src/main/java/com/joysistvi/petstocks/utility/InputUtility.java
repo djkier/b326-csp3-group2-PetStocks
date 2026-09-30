@@ -1,5 +1,9 @@
 package com.joysistvi.petstocks.utility;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class InputUtility {
@@ -71,6 +75,51 @@ public class InputUtility {
             return Integer.parseInt(input.trim());
         } catch (RuntimeException e) {
             return null;
+        }
+    }
+
+    public static LocalDate readDate(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if ("0".equals(input)) {
+                return null;
+            }
+
+            LocalDate date = parseDateOrNull(input);
+            if (date != null) {
+                return date;
+            }
+            System.out.println("Enter a valid date in YYYY-MM-DD format.");
+        }
+    }
+
+    public static LocalDate parseDateOrNull(String value) {
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    public static LocalDateTime readDateTimeOrNow(Scanner scanner, String prompt,
+                                                   DateTimeFormatter formatter,
+                                                   String formatHint) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if ("0".equals(input)) {
+                return null;
+            }
+            if (input.isEmpty()) {
+                return LocalDateTime.now();
+            }
+
+            try {
+                return LocalDateTime.parse(input, formatter);
+            } catch (DateTimeParseException e) {
+                System.out.println("Enter a valid date and time in " + formatHint + " format.");
+            }
         }
     }
 

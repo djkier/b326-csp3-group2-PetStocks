@@ -4,6 +4,8 @@ import com.joysistvi.petstocks.controller.InventoryController;
 import com.joysistvi.petstocks.controller.ProductController;
 import com.joysistvi.petstocks.model.Inventory;
 import com.joysistvi.petstocks.model.Product;
+import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -37,35 +39,35 @@ public class InventoryView {
 
         do {
             printMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> viewAllInventory();
-                case 2 -> pauseAfter(findInventoryById());
-                case 3 -> pauseAfter(viewInventoryByProduct());
+                case 2 -> CliViewUtility.pauseAfter(scanner, findInventoryById());
+                case 3 -> CliViewUtility.pauseAfter(scanner, viewInventoryByProduct());
                 case 4 -> {
                     searchInventory();
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
-                case 5 -> pauseAfter(viewLowStockInventory());
-                case 6 -> pauseAfter(viewExpiringInventory());
+                case 5 -> CliViewUtility.pauseAfter(scanner, viewLowStockInventory());
+                case 6 -> CliViewUtility.pauseAfter(scanner, viewExpiringInventory());
                 case 7 -> {
                     viewInventoryByBatchCode();
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
-                case 8 -> pauseAfter(createInventory());
-                case 9 -> pauseAfter(updateInventory());
+                case 8 -> CliViewUtility.pauseAfter(scanner, createInventory());
+                case 9 -> CliViewUtility.pauseAfter(scanner, updateInventory());
                 case 0 -> System.out.println("Returning to the development menu...");
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printMenu() {
-        showHeader("Inventory Management");
+        CliViewUtility.showHeader("Inventory Management");
         System.out.println("1. View All Inventory");
         System.out.println("2. Find Inventory by ID");
         System.out.println("3. View Inventory by Product");
@@ -83,10 +85,10 @@ public class InventoryView {
         int choice;
 
         do {
-            showHeader("All Inventory");
+            CliViewUtility.showHeader("All Inventory");
             printInventory(inventoryController.handleViewAllInventory(sortBy));
             printSortOptions();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "id";
@@ -100,8 +102,8 @@ public class InventoryView {
     }
 
     private boolean findInventoryById() {
-        showHeader("Find Inventory By ID");
-        int id = promptInt("Inventory ID (0 to cancel): ");
+        CliViewUtility.showHeader("Find Inventory By ID");
+        int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -114,8 +116,8 @@ public class InventoryView {
     }
 
     private boolean viewInventoryByProduct() {
-        showHeader("Inventory By Product");
-        int productId = promptInt("Product ID (0 to cancel): ");
+        CliViewUtility.showHeader("Inventory By Product");
+        int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
         }
@@ -125,15 +127,15 @@ public class InventoryView {
     }
 
     private void searchInventory() {
-        showHeader("Search Inventory");
+        CliViewUtility.showHeader("Search Inventory");
         System.out.print("Enter product, brand, batch code, or remark: ");
         String keyword = scanner.nextLine();
         printInventory(inventoryController.searchInventory(keyword));
     }
 
     private boolean viewLowStockInventory() {
-        showHeader("Low-Stock Inventory");
-        int maximumQuantity = promptInt(
+        CliViewUtility.showHeader("Low-Stock Inventory");
+        int maximumQuantity = InputUtility.readInt(scanner,
                 "Maximum batch quantity (0 includes out-of-stock, -1 to cancel): ");
         if (maximumQuantity == -1) {
             return false;
@@ -144,8 +146,8 @@ public class InventoryView {
     }
 
     private boolean viewExpiringInventory() {
-        showHeader("Expiring Inventory");
-        int daysAhead = promptInt("Show batches expiring within how many days? (-1 to cancel): ");
+        CliViewUtility.showHeader("Expiring Inventory");
+        int daysAhead = InputUtility.readInt(scanner, "Show batches expiring within how many days? (-1 to cancel): ");
         if (daysAhead == -1) {
             return false;
         }
@@ -155,20 +157,20 @@ public class InventoryView {
     }
 
     private void viewInventoryByBatchCode() {
-        showHeader("Inventory By Batch Code");
+        CliViewUtility.showHeader("Inventory By Batch Code");
         System.out.print("Batch code: ");
         String batchCode = scanner.nextLine();
         printInventory(inventoryController.handleViewInventoryByBatchCode(batchCode));
     }
 
     private boolean createInventory() {
-        showHeader("Create Inventory Record (Testing)");
+        CliViewUtility.showHeader("Create Inventory Record (Testing)");
         Product product = selectActiveProduct(null);
         if (product == null) {
             return false;
         }
 
-        int quantity = promptInt("Quantity: ");
+        int quantity = InputUtility.readInt(scanner, "Quantity: ");
         DateInput expirationInput = promptExpiration(
                 "Expiration (YYYY-MM-DD, Enter for N/A, 0 to cancel): ", null, false);
         if (expirationInput.cancelled()) {
@@ -195,10 +197,10 @@ public class InventoryView {
     }
 
     private boolean updateInventory() {
-        showHeader("Update Inventory Record (Testing)");
+        CliViewUtility.showHeader("Update Inventory Record (Testing)");
         printInventory(inventoryController.handleViewAllInventory("id"));
 
-        int id = promptInt("Inventory ID to update (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "Inventory ID to update (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -213,7 +215,7 @@ public class InventoryView {
             return false;
         }
 
-        int quantity = promptOptionalInt(
+        int quantity = InputUtility.readOptionalInt(scanner,
                 "New quantity [" + current.getQuantity() + "] (Enter to keep): ",
                 current.getQuantity());
         DateInput expirationInput = promptExpiration(
@@ -226,14 +228,14 @@ public class InventoryView {
         LocalDate expiration = expirationInput.expiration();
 
         System.out.print("New batch code [" + current.getBatchCode() + "] (Enter to keep): ");
-        String batchCode = keepCurrentIfBlank(scanner.nextLine(), current.getBatchCode());
+        String batchCode = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getBatchCode());
 
         String currentRemark = current.getRemark() == null ? "" : current.getRemark();
         System.out.print("New remark [" + currentRemark +
                 "] (Enter to keep, type NONE to clear): ");
         String remarkInput = scanner.nextLine();
         String remark = "NONE".equalsIgnoreCase(remarkInput.trim())
-                ? null : keepCurrentIfBlank(remarkInput, current.getRemark());
+                ? null : CliViewUtility.keepCurrentIfBlank(remarkInput, current.getRemark());
 
         Inventory inventory = new Inventory(
                 id, product, quantity, expiration, batchCode, remark);
@@ -315,9 +317,9 @@ public class InventoryView {
         for (Product product : products) {
             System.out.printf("| %-4d | %-25s | %-20s | %-25s |%n",
                     product.getId(),
-                    truncate(product.getName(), 25),
-                    truncate(product.getBrand(), 20),
-                    truncate(product.getCategory().getName(), 25));
+                    CliViewUtility.truncate(product.getName(), 25),
+                    CliViewUtility.truncate(product.getBrand(), 20),
+                    CliViewUtility.truncate(product.getCategory().getName(), 25));
         }
         System.out.println(border);
     }
@@ -355,14 +357,14 @@ public class InventoryView {
             String expiration = formatExpiration(item.getExpiration());
             System.out.printf(rowFormat,
                     item.getId(),
-                    truncate(product.getName(), PRODUCT_DISPLAY_WIDTH),
-                    truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
-                    truncate(product.getCategory().getName(), CATEGORY_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(product.getName(), PRODUCT_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(product.getCategory().getName(), CATEGORY_DISPLAY_WIDTH),
                     item.getQuantity(),
-                    truncate(expiration, EXPIRATION_DISPLAY_WIDTH),
-                    truncate(item.getBatchCode(), BATCH_DISPLAY_WIDTH),
-                    truncate(item.getRemark(), REMARK_DISPLAY_WIDTH),
-                    product.isArchived() ? "Archived" : "Active");
+                    CliViewUtility.truncate(expiration, EXPIRATION_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(item.getBatchCode(), BATCH_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(item.getRemark(), REMARK_DISPLAY_WIDTH),
+                    CliViewUtility.formatArchiveStatus(product.isArchived()));
         }
         System.out.println(border);
     }
@@ -405,64 +407,4 @@ public class InventoryView {
     private record DateInput(LocalDate expiration, boolean cancelled) {
     }
 
-    private int promptOptionalInt(String prompt, int currentValue) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-            if (input.isEmpty()) {
-                return currentValue;
-            }
-
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number or press Enter to keep.");
-            }
-        }
-    }
-
-    private String keepCurrentIfBlank(String value, String currentValue) {
-        return value.trim().isEmpty() ? currentValue : value;
-    }
-
-    private void pauseAfter(boolean shouldPause) {
-        if (shouldPause) {
-            pressEnterToContinue();
-        }
-    }
-
-    private int promptInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number.");
-            }
-        }
-    }
-
-    private void pressEnterToContinue() {
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    private void showHeader(String title) {
-        System.out.println();
-        System.out.println("=".repeat(72));
-        System.out.println(title);
-        System.out.println("=".repeat(72));
-    }
-
-    private String truncate(String value, int maxLength) {
-        if (value == null) {
-            return "";
-        }
-        if (value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
-    }
 }

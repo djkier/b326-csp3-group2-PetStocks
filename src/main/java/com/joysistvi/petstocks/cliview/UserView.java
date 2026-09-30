@@ -2,6 +2,8 @@ package com.joysistvi.petstocks.cliview;
 
 import com.joysistvi.petstocks.controller.UserController;
 import com.joysistvi.petstocks.model.User;
+import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.List;
 import java.util.Scanner;
@@ -23,30 +25,30 @@ public class UserView {
 
         do {
             printMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> viewAllUsers();
-                case 2 -> pauseAfter(findUserById());
+                case 2 -> CliViewUtility.pauseAfter(scanner, findUserById());
                 case 3 -> {
                     searchUsers();
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
-                case 4 -> pauseAfter(createUser());
-                case 5 -> pauseAfter(updateUsername());
-                case 6 -> pauseAfter(updateRole());
-                case 7 -> pauseAfter(changePassword());
+                case 4 -> CliViewUtility.pauseAfter(scanner, createUser());
+                case 5 -> CliViewUtility.pauseAfter(scanner, updateUsername());
+                case 6 -> CliViewUtility.pauseAfter(scanner, updateRole());
+                case 7 -> CliViewUtility.pauseAfter(scanner, changePassword());
                 case 0 -> System.out.println("Returning to the development menu...");
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printMenu() {
-        showHeader("User Management");
+        CliViewUtility.showHeader("User Management");
         System.out.println("1. View All Users");
         System.out.println("2. Find User by ID");
         System.out.println("3. Search Users");
@@ -62,11 +64,11 @@ public class UserView {
         int choice;
 
         do {
-            showHeader("All Users");
+            CliViewUtility.showHeader("All Users");
             printUsers(userController.handleViewAllUsers(sortBy));
             System.out.println();
             System.out.println("Sort by: [1] ID  [2] Username  [3] Role  [0] Back");
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "id";
@@ -79,8 +81,8 @@ public class UserView {
     }
 
     private boolean findUserById() {
-        showHeader("Find User By ID");
-        int id = promptInt("User ID (0 to cancel): ");
+        CliViewUtility.showHeader("Find User By ID");
+        int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -93,14 +95,14 @@ public class UserView {
     }
 
     private void searchUsers() {
-        showHeader("Search Users");
+        CliViewUtility.showHeader("Search Users");
         System.out.print("Enter username or role: ");
         String keyword = scanner.nextLine();
         printUsers(userController.searchUsers(keyword));
     }
 
     private boolean createUser() {
-        showHeader("Create / Register User");
+        CliViewUtility.showHeader("Create / Register User");
         System.out.print("Username (0 to cancel): ");
         String username = scanner.nextLine();
         if ("0".equals(username.trim())) {
@@ -126,9 +128,9 @@ public class UserView {
     }
 
     private boolean updateUsername() {
-        showHeader("Update Username");
+        CliViewUtility.showHeader("Update Username");
         printUsers(userController.handleViewAllUsers("id"));
-        int id = promptInt("User ID to update (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "User ID to update (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -152,9 +154,9 @@ public class UserView {
     }
 
     private boolean updateRole() {
-        showHeader("Update User Role");
+        CliViewUtility.showHeader("Update User Role");
         printUsers(userController.handleViewAllUsers("id"));
-        int id = promptInt("User ID to update (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "User ID to update (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -178,9 +180,9 @@ public class UserView {
     }
 
     private boolean changePassword() {
-        showHeader("Change User Password");
+        CliViewUtility.showHeader("Change User Password");
         printUsers(userController.handleViewAllUsers("id"));
-        int id = promptInt("User ID (0 to cancel): ");
+        int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -206,7 +208,7 @@ public class UserView {
             System.out.println("1. ADMIN");
             System.out.println("2. STAFF");
             System.out.println("0. Cancel");
-            int choice = promptInt("Role: ");
+            int choice = InputUtility.readInt(scanner, "Role: ");
 
             switch (choice) {
                 case 1:
@@ -255,49 +257,10 @@ public class UserView {
         for (User user : users) {
             System.out.printf(rowFormat,
                     user.getId(),
-                    truncate(user.getUsername(), USERNAME_DISPLAY_WIDTH),
-                    truncate(user.getRole(), ROLE_DISPLAY_WIDTH));
+                    CliViewUtility.truncate(user.getUsername(), USERNAME_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(user.getRole(), ROLE_DISPLAY_WIDTH));
         }
         System.out.println(border);
     }
 
-    private int promptInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number.");
-            }
-        }
-    }
-
-    private String truncate(String value, int maxLength) {
-        if (value == null) {
-            return "";
-        }
-        if (value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
-    }
-
-    private void pauseAfter(boolean shouldPause) {
-        if (shouldPause) {
-            pressEnterToContinue();
-        }
-    }
-
-    private void pressEnterToContinue() {
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    private void showHeader(String title) {
-        System.out.println();
-        System.out.println("=".repeat(72));
-        System.out.println(title);
-        System.out.println("=".repeat(72));
-    }
 }

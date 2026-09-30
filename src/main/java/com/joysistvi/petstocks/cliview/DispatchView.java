@@ -6,11 +6,12 @@ import com.joysistvi.petstocks.controller.ProductController;
 import com.joysistvi.petstocks.model.Dispatch;
 import com.joysistvi.petstocks.model.Inventory;
 import com.joysistvi.petstocks.model.Product;
+import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,27 +42,27 @@ public class DispatchView {
 
         do {
             printMenu();
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
-                case 1 -> pauseAfter(recordStockOut());
+                case 1 -> CliViewUtility.pauseAfter(scanner, recordStockOut());
                 case 2 -> viewDispatchHistory();
-                case 3 -> pauseAfter(findDispatchById());
-                case 4 -> pauseAfter(viewDispatchesByInventory());
-                case 5 -> pauseAfter(viewDispatchesByProduct());
-                case 6 -> pauseAfter(viewDispatchesByUser());
-                case 7 -> pauseAfter(viewDispatchesByDateRange());
+                case 3 -> CliViewUtility.pauseAfter(scanner, findDispatchById());
+                case 4 -> CliViewUtility.pauseAfter(scanner, viewDispatchesByInventory());
+                case 5 -> CliViewUtility.pauseAfter(scanner, viewDispatchesByProduct());
+                case 6 -> CliViewUtility.pauseAfter(scanner, viewDispatchesByUser());
+                case 7 -> CliViewUtility.pauseAfter(scanner, viewDispatchesByDateRange());
                 case 0 -> System.out.println("Returning to the development menu...");
                 default -> {
                     System.out.println("Invalid menu selection.");
-                    pressEnterToContinue();
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
             }
         } while (choice != 0);
     }
 
     private void printMenu() {
-        showHeader("Dispatch / Stock-Out Management");
+        CliViewUtility.showHeader("Dispatch / Stock-Out Management");
         System.out.println("1. Record Stock Out");
         System.out.println("2. View Dispatch History");
         System.out.println("3. Find Dispatch by ID");
@@ -73,7 +74,7 @@ public class DispatchView {
     }
 
     private boolean recordStockOut() {
-        showHeader("Record Stock Out");
+        CliViewUtility.showHeader("Record Stock Out");
 
         Inventory inventory = selectInventory();
         if (inventory == null) {
@@ -85,18 +86,22 @@ public class DispatchView {
             return false;
         }
 
-        int quantityDispatched = promptInt("Quantity dispatched (0 to cancel): ");
+        int quantityDispatched = InputUtility.readInt(scanner, "Quantity dispatched (0 to cancel): ");
         if (quantityDispatched == 0) {
             return false;
         }
 
-        DateTimeInput dispatchInput = promptDispatchDateTime();
-        if (dispatchInput.cancelled()) {
+        LocalDateTime datetimeDispatched = InputUtility.readDateTimeOrNow(
+                scanner,
+                "Dispatch date/time (YYYY-MM-DD HH:mm, Enter for now, 0 to cancel): ",
+                DATE_TIME_INPUT,
+                "YYYY-MM-DD HH:mm");
+        if (datetimeDispatched == null) {
             return false;
         }
 
         Dispatch dispatch = new Dispatch(
-                inventory, dispatchInput.value(), quantityDispatched, userId);
+                inventory, datetimeDispatched, quantityDispatched, userId);
         boolean isSuccess = dispatchController.handleRecordStockOut(dispatch);
         System.out.println(isSuccess
                 ? "Stock-out recorded and inventory quantity decreased successfully."
@@ -117,11 +122,11 @@ public class DispatchView {
         int choice;
 
         do {
-            showHeader("Dispatch History");
+            CliViewUtility.showHeader("Dispatch History");
             printDispatches(dispatchController.handleViewDispatchHistory(sortBy));
             System.out.println();
             System.out.println("Sort by: [1] Date  [2] ID  [3] Product  [4] User  [0] Back");
-            choice = promptInt("Choice: ");
+            choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> sortBy = "date";
@@ -135,8 +140,8 @@ public class DispatchView {
     }
 
     private boolean findDispatchById() {
-        showHeader("Find Dispatch By ID");
-        int id = promptInt("Dispatch ID (0 to cancel): ");
+        CliViewUtility.showHeader("Find Dispatch By ID");
+        int id = InputUtility.readInt(scanner, "Dispatch ID (0 to cancel): ");
         if (id == 0) {
             return false;
         }
@@ -149,9 +154,9 @@ public class DispatchView {
     }
 
     private boolean viewDispatchesByInventory() {
-        showHeader("Dispatches By Inventory");
+        CliViewUtility.showHeader("Dispatches By Inventory");
         printInventoryChoices(inventoryController.handleViewAllInventory("id"));
-        int inventoryId = promptInt("Inventory ID (0 to cancel): ");
+        int inventoryId = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (inventoryId == 0) {
             return false;
         }
@@ -161,12 +166,12 @@ public class DispatchView {
     }
 
     private boolean viewDispatchesByProduct() {
-        showHeader("Dispatches By Product");
+        CliViewUtility.showHeader("Dispatches By Product");
         List<Product> products = new ArrayList<>(productController.handleViewAllProducts("id"));
         products.addAll(productController.handleViewArchivedProducts("id"));
         printProductChoices(products);
 
-        int productId = promptInt("Product ID (0 to cancel): ");
+        int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
         }
@@ -176,10 +181,10 @@ public class DispatchView {
     }
 
     private boolean viewDispatchesByUser() {
-        showHeader("Dispatches By User");
+        CliViewUtility.showHeader("Dispatches By User");
         Map<Integer, String> users = dispatchController.handleGetAvailableUsers();
         printUserChoices(users);
-        int userId = promptInt("User ID (0 to cancel): ");
+        int userId = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
         if (userId == 0) {
             return false;
         }
@@ -189,8 +194,9 @@ public class DispatchView {
     }
 
     private boolean viewDispatchesByDateRange() {
-        showHeader("Dispatches By Date / Date Range");
-        LocalDate startDate = promptDate("Start date (YYYY-MM-DD, 0 to cancel): ");
+        CliViewUtility.showHeader("Dispatches By Date / Date Range");
+        LocalDate startDate = InputUtility.readDate(
+                scanner, "Start date (YYYY-MM-DD, 0 to cancel): ");
         if (startDate == null) {
             return false;
         }
@@ -201,14 +207,15 @@ public class DispatchView {
             return false;
         }
 
-        LocalDate endDate = endInput.isEmpty() ? startDate : parseDate(endInput);
+        LocalDate endDate = endInput.isEmpty()
+                ? startDate : InputUtility.parseDateOrNull(endInput);
         while (endDate == null) {
             System.out.print("Enter a valid end date (YYYY-MM-DD, 0 to cancel): ");
             endInput = scanner.nextLine().trim();
             if ("0".equals(endInput)) {
                 return false;
             }
-            endDate = parseDate(endInput);
+            endDate = InputUtility.parseDateOrNull(endInput);
         }
 
         printDispatches(dispatchController.handleViewDispatchesByDateRange(startDate, endDate));
@@ -224,7 +231,7 @@ public class DispatchView {
 
         printInventoryChoices(inventory);
         while (true) {
-            int id = promptInt("Inventory ID (0 to cancel): ");
+            int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
             if (id == 0) {
                 return null;
             }
@@ -246,7 +253,7 @@ public class DispatchView {
 
         printUserChoices(users);
         while (true) {
-            int id = promptInt("User ID (0 to cancel): ");
+            int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
             if (id == 0) {
                 return null;
             }
@@ -276,9 +283,9 @@ public class DispatchView {
         for (Dispatch dispatch : dispatches) {
             System.out.printf(rowFormat,
                     dispatch.getId(),
-                    truncate(dispatch.getInventory().getProduct().getName(), 20),
-                    truncate(dispatch.getInventory().getBatchCode(), 14),
-                    truncate(dispatch.getUsername(), 14),
+                    CliViewUtility.truncate(dispatch.getInventory().getProduct().getName(), 20),
+                    CliViewUtility.truncate(dispatch.getInventory().getBatchCode(), 14),
+                    CliViewUtility.truncate(dispatch.getUsername(), 14),
                     dispatch.getDatetimeDispatched().format(DATE_TIME_DISPLAY),
                     dispatch.getQuantityDispatched(),
                     dispatch.getInventory().getQuantity());
@@ -297,8 +304,8 @@ public class DispatchView {
         for (Inventory item : inventory) {
             System.out.printf("%-6d %-22s %-16s %-10d%n",
                     item.getId(),
-                    truncate(item.getProduct().getName(), 22),
-                    truncate(item.getBatchCode(), 16),
+                    CliViewUtility.truncate(item.getProduct().getName(), 22),
+                    CliViewUtility.truncate(item.getBatchCode(), 16),
                     item.getQuantity());
         }
     }
@@ -312,8 +319,8 @@ public class DispatchView {
         System.out.printf("%-6s %-28s %-10s%n", "ID", "Product", "Status");
         for (Product product : products) {
             System.out.printf("%-6d %-28s %-10s%n",
-                    product.getId(), truncate(product.getName(), 28),
-                    product.isArchived() ? "Archived" : "Active");
+                    product.getId(), CliViewUtility.truncate(product.getName(), 28),
+                    CliViewUtility.formatArchiveStatus(product.isArchived()));
         }
     }
 
@@ -325,92 +332,7 @@ public class DispatchView {
 
         System.out.printf("%-6s %-30s%n", "ID", "Username");
         users.forEach((id, username) ->
-                System.out.printf("%-6d %-30s%n", id, truncate(username, 30)));
+                System.out.printf("%-6d %-30s%n", id, CliViewUtility.truncate(username, 30)));
     }
 
-    private DateTimeInput promptDispatchDateTime() {
-        while (true) {
-            System.out.print("Dispatch date/time (YYYY-MM-DD HH:mm, Enter for now, 0 to cancel): ");
-            String input = scanner.nextLine().trim();
-            if ("0".equals(input)) {
-                return new DateTimeInput(null, true);
-            }
-            if (input.isEmpty()) {
-                return new DateTimeInput(LocalDateTime.now(), false);
-            }
-
-            try {
-                return new DateTimeInput(LocalDateTime.parse(input, DATE_TIME_INPUT), false);
-            } catch (DateTimeParseException e) {
-                System.out.println("Enter a valid date and time in YYYY-MM-DD HH:mm format.");
-            }
-        }
-    }
-
-    private LocalDate promptDate(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-            if ("0".equals(input)) {
-                return null;
-            }
-
-            LocalDate date = parseDate(input);
-            if (date != null) {
-                return date;
-            }
-            System.out.println("Enter a valid date in YYYY-MM-DD format.");
-        }
-    }
-
-    private LocalDate parseDate(String value) {
-        try {
-            return LocalDate.parse(value);
-        } catch (DateTimeParseException e) {
-            return null;
-        }
-    }
-
-    private int promptInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid whole number.");
-            }
-        }
-    }
-
-    private String truncate(String value, int maxLength) {
-        if (value == null) {
-            return "";
-        }
-        if (value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
-    }
-
-    private void pauseAfter(boolean shouldPause) {
-        if (shouldPause) {
-            pressEnterToContinue();
-        }
-    }
-
-    private void pressEnterToContinue() {
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    private void showHeader(String title) {
-        System.out.println();
-        System.out.println("=".repeat(72));
-        System.out.println(title);
-        System.out.println("=".repeat(72));
-    }
-
-    private record DateTimeInput(LocalDateTime value, boolean cancelled) {
-    }
 }
