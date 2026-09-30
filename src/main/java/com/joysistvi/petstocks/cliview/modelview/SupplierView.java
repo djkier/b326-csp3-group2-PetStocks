@@ -1,4 +1,4 @@
-package com.joysistvi.petstocks.cliview;
+package com.joysistvi.petstocks.cliview.modelview;
 
 import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.model.Supplier;

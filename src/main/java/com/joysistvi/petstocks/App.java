@@ -1,14 +1,14 @@
 package com.joysistvi.petstocks;
 
-import com.joysistvi.petstocks.cliview.CategoryView;
-import com.joysistvi.petstocks.cliview.DispatchView;
-import com.joysistvi.petstocks.cliview.InventoryView;
-import com.joysistvi.petstocks.cliview.PetTypeView;
-import com.joysistvi.petstocks.cliview.ProductPetTypeView;
-import com.joysistvi.petstocks.cliview.ProductView;
-import com.joysistvi.petstocks.cliview.RestockView;
-import com.joysistvi.petstocks.cliview.SupplierView;
-import com.joysistvi.petstocks.cliview.UserView;
+import com.joysistvi.petstocks.cliview.modelview.CategoryView;
+import com.joysistvi.petstocks.cliview.modelview.DispatchView;
+import com.joysistvi.petstocks.cliview.modelview.InventoryView;
+import com.joysistvi.petstocks.cliview.modelview.PetTypeView;
+import com.joysistvi.petstocks.cliview.modelview.ProductPetTypeView;
+import com.joysistvi.petstocks.cliview.modelview.ProductView;
+import com.joysistvi.petstocks.cliview.modelview.RestockView;
+import com.joysistvi.petstocks.cliview.modelview.SupplierView;
+import com.joysistvi.petstocks.cliview.modelview.UserView;
 import com.joysistvi.petstocks.config.DBConnection;
 import com.joysistvi.petstocks.controller.CategoryController;
 import com.joysistvi.petstocks.controller.DispatchController;
