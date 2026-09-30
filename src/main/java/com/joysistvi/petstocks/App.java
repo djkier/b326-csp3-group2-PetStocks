@@ -2,17 +2,21 @@ package com.joysistvi.petstocks;
 
 import com.joysistvi.petstocks.cliview.CategoryView;
 import com.joysistvi.petstocks.cliview.PetTypeView;
+import com.joysistvi.petstocks.cliview.ProductPetTypeView;
 import com.joysistvi.petstocks.cliview.ProductView;
 import com.joysistvi.petstocks.cliview.SupplierView;
 import com.joysistvi.petstocks.config.DBConnection;
 import com.joysistvi.petstocks.controller.CategoryController;
 import com.joysistvi.petstocks.controller.PetTypeController;
+import com.joysistvi.petstocks.controller.ProductPetTypeController;
 import com.joysistvi.petstocks.controller.ProductController;
 import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.repository.CategoryRepo;
 import com.joysistvi.petstocks.repository.CategoryRepoImpl;
 import com.joysistvi.petstocks.repository.PetTypeRepo;
 import com.joysistvi.petstocks.repository.PetTypeRepoImpl;
+import com.joysistvi.petstocks.repository.ProductPetTypeRepo;
+import com.joysistvi.petstocks.repository.ProductPetTypeRepoImpl;
 import com.joysistvi.petstocks.repository.ProductRepo;
 import com.joysistvi.petstocks.repository.ProductRepoImpl;
 import com.joysistvi.petstocks.repository.SupplierRepo;
@@ -21,6 +25,8 @@ import com.joysistvi.petstocks.service.CategoryService;
 import com.joysistvi.petstocks.service.CategoryServiceImpl;
 import com.joysistvi.petstocks.service.PetTypeService;
 import com.joysistvi.petstocks.service.PetTypeServiceImpl;
+import com.joysistvi.petstocks.service.ProductPetTypeService;
+import com.joysistvi.petstocks.service.ProductPetTypeServiceImpl;
 import com.joysistvi.petstocks.service.ProductService;
 import com.joysistvi.petstocks.service.ProductServiceImpl;
 import com.joysistvi.petstocks.service.SupplierService;
@@ -48,19 +54,29 @@ public class App {
         ProductService productService = new ProductServiceImpl(productRepo, categoryRepo);
         ProductController productController = new ProductController(productService);
 
+        ProductPetTypeRepo productPetTypeRepo = new ProductPetTypeRepoImpl(dbConnection);
+        ProductPetTypeService productPetTypeService = new ProductPetTypeServiceImpl(
+                productPetTypeRepo, productRepo, petTypeRepo);
+        ProductPetTypeController productPetTypeController =
+                new ProductPetTypeController(productPetTypeService);
+
         try (Scanner scanner = new Scanner(System.in)) {
             PetTypeView petTypeView = new PetTypeView(petTypeController, scanner);
             CategoryView categoryView = new CategoryView(categoryController, scanner);
             SupplierView supplierView = new SupplierView(supplierController, scanner);
             ProductView productView = new ProductView(productController, categoryController, scanner);
+            ProductPetTypeView productPetTypeView = new ProductPetTypeView(
+                    productPetTypeController, productController, petTypeController, scanner);
 
-            runDevelopmentMenu(scanner, petTypeView, categoryView, supplierView, productView);
+            runDevelopmentMenu(scanner, petTypeView, categoryView, supplierView, productView,
+                    productPetTypeView);
         }
     }
 
     private static void runDevelopmentMenu(Scanner scanner, PetTypeView petTypeView,
                                            CategoryView categoryView, SupplierView supplierView,
-                                           ProductView productView) {
+                                           ProductView productView,
+                                           ProductPetTypeView productPetTypeView) {
         int choice;
 
         do {
@@ -72,6 +88,7 @@ public class App {
             System.out.println("2. Test Category MVC");
             System.out.println("3. Test Supplier MVC");
             System.out.println("4. Test Product MVC");
+            System.out.println("5. Test Product Pet Type MVC");
             System.out.println("0. Exit");
             choice = promptInt(scanner, "Choice: ");
 
@@ -80,6 +97,7 @@ public class App {
                 case 2 -> categoryView.run();
                 case 3 -> supplierView.run();
                 case 4 -> productView.run();
+                case 5 -> productPetTypeView.run();
                 case 0 -> System.out.println("Exiting PetStock...");
                 default -> System.out.println("Invalid menu selection.");
             }
