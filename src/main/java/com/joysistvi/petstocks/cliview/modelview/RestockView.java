@@ -4,6 +4,7 @@ import com.joysistvi.petstocks.controller.InventoryController;
 import com.joysistvi.petstocks.controller.RestockController;
 import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.model.Inventory;
+import com.joysistvi.petstocks.model.Product;
 import com.joysistvi.petstocks.model.Restock;
 import com.joysistvi.petstocks.model.Supplier;
 import com.joysistvi.petstocks.model.User;
@@ -27,14 +28,21 @@ public class RestockView {
     private final RestockController restockController;
     private final InventoryController inventoryController;
     private final SupplierController supplierController;
+    private final ProductView productView;
+    private final InventoryView inventoryView;
     private final Scanner scanner;
 
     public RestockView(RestockController restockController,
                        InventoryController inventoryController,
-                       SupplierController supplierController, Scanner scanner) {
+                       SupplierController supplierController,
+                       ProductView productView,
+                       InventoryView inventoryView,
+                       Scanner scanner) {
         this.restockController = restockController;
         this.inventoryController = inventoryController;
         this.supplierController = supplierController;
+        this.productView = productView;
+        this.inventoryView = inventoryView;
         this.scanner = scanner;
     }
 
@@ -89,7 +97,7 @@ public class RestockView {
     private boolean recordStockIn(User currentUser, boolean promptForUser) {
         CliViewUtility.showHeader("Record Stock In");
 
-        Inventory inventory = selectInventory();
+        Inventory inventory = selectStockInInventory();
         if (inventory == null) {
             return false;
         }
@@ -142,6 +150,39 @@ public class RestockView {
             }
         }
         return true;
+    }
+
+    private Inventory selectStockInInventory() {
+        while (true) {
+            System.out.println("1. Select Existing Inventory");
+            System.out.println("2. Add New Product / Inventory");
+            System.out.println("3. Cancel");
+            int choice = InputUtility.readInt(scanner, "Choice: ");
+
+            switch (choice) {
+                case 1:
+                    return selectInventory();
+                case 2:
+                    return createNewProductInventory();
+                case 3:
+                    return null;
+                default:
+                    System.out.println("Invalid menu selection.");
+            }
+        }
+    }
+
+    private Inventory createNewProductInventory() {
+        Product product = productView.createProductForStockIn();
+        if (product == null) {
+            return null;
+        }
+
+        Inventory inventory = inventoryView.createInitialInventory(product);
+        if (inventory == null) {
+            System.out.println("Stock-in cancelled before a restock was created.");
+        }
+        return inventory;
     }
 
     private void viewRestockHistory() {
