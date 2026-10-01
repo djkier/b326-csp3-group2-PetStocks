@@ -20,21 +20,25 @@ public class AdminMainView {
     }
 
     public void run(User currentUser) {
-        int choice;
+        boolean logoutConfirmed = false;
 
-        do {
+        while (!logoutConfirmed) {
             printMenu();
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            int choice = InputUtility.readInt(scanner, "Choice: ");
 
             if (choice == 0) {
-                System.out.println("Logging out...");
+                logoutConfirmed = CliViewUtility.confirmChoice(
+                        scanner, "Logout Confirmation", "Are you sure you want to log out?");
+                if (logoutConfirmed) {
+                    System.out.println("Logging out...");
+                }
             } else if (choice == 5) {
                 adminManagementView.run();
             } else if (!staffMainView.handleOperationalSelection(choice, currentUser)) {
                 System.out.println("Invalid menu selection.");
                 InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
             }
-        } while (choice != 0);
+        }
     }
 
     private void printMenu() {
