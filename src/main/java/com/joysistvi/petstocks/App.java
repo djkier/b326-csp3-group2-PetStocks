@@ -139,8 +139,8 @@ public class App {
             }
 
             switch (currentUser.getRole()) {
-                case "STAFF" -> staffMainView.run();
-                case "ADMIN" -> adminMainView.run();
+                case "STAFF" -> staffMainView.run(currentUser);
+                case "ADMIN" -> adminMainView.run(currentUser);
                 default -> System.out.println("Invalid username or password.");
             }
 
