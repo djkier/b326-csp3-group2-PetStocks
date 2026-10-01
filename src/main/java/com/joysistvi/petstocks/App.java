@@ -10,6 +10,7 @@ import com.joysistvi.petstocks.cliview.modelview.RestockView;
 import com.joysistvi.petstocks.cliview.modelview.SupplierView;
 import com.joysistvi.petstocks.cliview.modelview.UserView;
 import com.joysistvi.petstocks.cliview.publicview.LoginView;
+import com.joysistvi.petstocks.cliview.publicview.MonitorView;
 import com.joysistvi.petstocks.cliview.publicview.StaffInventoryView;
 import com.joysistvi.petstocks.cliview.publicview.StaffMainView;
 import com.joysistvi.petstocks.cliview.publicview.StockMovementView;
@@ -124,8 +125,10 @@ public class App {
                     inventoryView, scanner);
             StockMovementView stockMovementView = new StockMovementView(
                     restockController, dispatchController, scanner);
+            MonitorView monitorView = new MonitorView(inventoryView, scanner);
             StaffMainView staffMainView = new StaffMainView(
-                    staffInventoryView, restockView, dispatchView, stockMovementView, scanner);
+                    staffInventoryView, restockView, dispatchView,
+                    stockMovementView, monitorView, scanner);
             LoginView loginView = new LoginView(scanner);
 
             runLoginMenu(loginView, staffMainView);
