@@ -6,9 +6,38 @@ import java.util.function.Consumer;
 
 public final class CliViewUtility {
     private static final int HEADER_WIDTH = 72;
+    private static final int FALLBACK_CLEAR_LINES = 50;
+    private static final String ANSI_CLEAR_SCREEN = "\u001B[H\u001B[2J";
     public static final int RECORDS_PER_PAGE = 10;
+    private static String currentScreenTitle;
 
     private CliViewUtility() {
+    }
+
+    public static void clearScreen() {
+        try {
+            if (supportsAnsi()) {
+                System.out.print(ANSI_CLEAR_SCREEN);
+            } else {
+                System.out.print(System.lineSeparator().repeat(FALLBACK_CLEAR_LINES));
+            }
+            System.out.flush();
+        } catch (RuntimeException e) {
+            System.out.println();
+        }
+    }
+
+    public static void showScreen(String title) {
+        currentScreenTitle = title;
+        clearScreen();
+        showHeader(title);
+    }
+
+    public static void refreshScreen() {
+        clearScreen();
+        if (currentScreenTitle != null) {
+            showHeader(currentScreenTitle);
+        }
     }
 
     public static void showHeader(String title) {
@@ -23,6 +52,13 @@ public final class CliViewUtility {
         System.out.println(" ".repeat(leftPadding) + displayedTitle
                 + " ".repeat(rightPadding));
         System.out.println("=".repeat(HEADER_WIDTH));
+    }
+
+    private static boolean supportsAnsi() {
+        return System.console() != null
+                || System.getenv("TERM") != null
+                || System.getenv("WT_SESSION") != null
+                || System.getenv("ANSICON") != null;
     }
 
     public static String truncate(String value, int maxLength) {
@@ -84,6 +120,14 @@ public final class CliViewUtility {
         return currentPage;
     }
 
+    public static int previousPage(int currentPage, Scanner scanner) {
+        int previousPage = previousPage(currentPage);
+        if (previousPage == currentPage) {
+            InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+        }
+        return previousPage;
+    }
+
     public static int nextPage(int currentPage, int recordCount) {
         if (currentPage < totalPages(recordCount) - 1) {
             return currentPage + 1;
@@ -92,10 +136,23 @@ public final class CliViewUtility {
         return currentPage;
     }
 
+    public static int nextPage(int currentPage, int recordCount, Scanner scanner) {
+        int nextPage = nextPage(currentPage, recordCount);
+        if (nextPage == currentPage) {
+            InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+        }
+        return nextPage;
+    }
+
     public static <T> void browsePages(List<T> records, Scanner scanner,
                                        Consumer<List<T>> tablePrinter) {
         int currentPage = 0;
+        boolean firstRender = true;
         while (true) {
+            if (!firstRender) {
+                refreshScreen();
+            }
+            firstRender = false;
             tablePrinter.accept(page(records, currentPage));
             printPagination(currentPage, records.size());
             if (totalPages(records.size()) == 1) {
@@ -105,10 +162,13 @@ public final class CliViewUtility {
             System.out.print("Page choice ([P] Previous, [N] Next, [0] Continue): ");
             String choice = scanner.nextLine().trim().toUpperCase();
             switch (choice) {
-                case "P" -> currentPage = previousPage(currentPage);
-                case "N" -> currentPage = nextPage(currentPage, records.size());
+                case "P" -> currentPage = previousPage(currentPage, scanner);
+                case "N" -> currentPage = nextPage(currentPage, records.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid page selection.");
+                default -> {
+                    System.out.println("Invalid page selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
