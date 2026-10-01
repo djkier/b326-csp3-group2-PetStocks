@@ -123,18 +123,39 @@ public class InventoryRepoImpl implements InventoryRepo {
     }
 
     @Override
-    public List<Inventory> getLowStockInventory(int maximumQuantity) {
+    public List<Inventory> getLowStockInventory(int exclusiveUpperBound) {
         List<Inventory> inventory = new ArrayList<>();
         String query = INVENTORY_SELECT +
-                "WHERE i.quantity <= ? ORDER BY i.quantity, p.name, i.expiration";
+                "WHERE i.quantity > 0 AND i.quantity < ? " +
+                "ORDER BY i.quantity, p.name, i.expiration";
 
         try (Connection conn = dbConnection.getConnection();
              PreparedStatement prep = conn.prepareStatement(query)) {
 
-            prep.setInt(1, maximumQuantity);
+            prep.setInt(1, exclusiveUpperBound);
             addResults(prep, inventory);
         } catch (SQLException e) {
             System.err.println("Get Low Stock Inventory Error: " + e.getMessage());
+        }
+
+        return inventory;
+    }
+
+    @Override
+    public List<Inventory> getOutOfStockInventory() {
+        List<Inventory> inventory = new ArrayList<>();
+        String query = INVENTORY_SELECT +
+                "WHERE i.quantity = 0 ORDER BY p.name, i.expiration";
+
+        try (Connection conn = dbConnection.getConnection();
+             Statement statement = conn.createStatement();
+             ResultSet result = statement.executeQuery(query)) {
+
+            while (result.next()) {
+                inventory.add(mapInventory(result));
+            }
+        } catch (SQLException e) {
+            System.err.println("Get Out-of-Stock Inventory Error: " + e.getMessage());
         }
 
         return inventory;

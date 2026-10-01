@@ -49,7 +49,7 @@ public class InventoryView {
                     searchInventory();
                     InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
-                case 5 -> CliViewUtility.pauseAfter(scanner, viewLowStockInventory());
+                case 5 -> viewLowStockInventory();
                 case 6 -> CliViewUtility.pauseAfter(scanner, viewExpiringInventory());
                 case 7 -> {
                     viewInventoryByBatchCode();
@@ -133,16 +133,34 @@ public class InventoryView {
         printInventory(inventoryController.searchInventory(keyword));
     }
 
-    public boolean viewLowStockInventory() {
-        CliViewUtility.showHeader("Low-Stock Inventory");
-        int maximumQuantity = InputUtility.readInt(scanner,
-                "Maximum batch quantity (0 includes out-of-stock, -1 to cancel): ");
-        if (maximumQuantity == -1) {
-            return false;
-        }
+    public void viewLowStockInventory() {
+        LowStockDisplay display = LowStockDisplay.LOW_STOCK;
 
-        printInventory(inventoryController.handleViewLowStockInventory(maximumQuantity));
-        return true;
+        while (true) {
+            switch (display) {
+                case LOW_STOCK -> {
+                    CliViewUtility.showHeader("Low-Stock Inventory");
+                    System.out.println("Showing inventory with stock quantities below 10.");
+                    printInventory(inventoryController.handleViewLowStockInventory());
+                }
+                case OUT_OF_STOCK -> {
+                    CliViewUtility.showHeader("Out-of-Stock Inventory");
+                    System.out.println("Showing out-of-stock inventory.");
+                    printInventory(inventoryController.handleViewOutOfStockInventory());
+                }
+            }
+
+            printLowStockOptions();
+            int choice = InputUtility.readInt(scanner, "Choice: ");
+            switch (choice) {
+                case 1 -> display = LowStockDisplay.OUT_OF_STOCK;
+                case 2 -> display = LowStockDisplay.LOW_STOCK;
+                case 0 -> {
+                    return;
+                }
+                default -> System.out.println("Invalid menu selection.");
+            }
+        }
     }
 
     public boolean viewExpiringInventory() {
@@ -325,11 +343,6 @@ public class InventoryView {
     }
 
     public void printInventory(List<Inventory> inventory) {
-        if (inventory.isEmpty()) {
-            System.out.println("No inventory records found.");
-            return;
-        }
-
         String border = "+" + "-".repeat(ID_DISPLAY_WIDTH + 2)
                 + "+" + "-".repeat(PRODUCT_DISPLAY_WIDTH + 2)
                 + "+" + "-".repeat(BRAND_DISPLAY_WIDTH + 2)
@@ -352,6 +365,12 @@ public class InventoryView {
                 "Batch Code", "Remark", "Status");
         System.out.println(border);
 
+        if (inventory.isEmpty()) {
+            System.out.println("No Inventory Records Found.");
+            System.out.println(border);
+            return;
+        }
+
         for (Inventory item : inventory) {
             Product product = item.getProduct();
             String expiration = formatExpiration(item.getExpiration());
@@ -372,6 +391,12 @@ public class InventoryView {
     private void printSortOptions() {
         System.out.println();
         System.out.println("Sort by: [1] ID    [2] Product    [3] Quantity    [4] Expiration    [0] Back");
+    }
+
+    private void printLowStockOptions() {
+        System.out.println();
+        System.out.println(
+                "View: [1] Out-of-Stock        [2] View Low-Stock Inventory        [0] Back");
     }
 
     private DateInput promptExpiration(String prompt, LocalDate currentValue,
@@ -405,6 +430,11 @@ public class InventoryView {
     }
 
     private record DateInput(LocalDate expiration, boolean cancelled) {
+    }
+
+    private enum LowStockDisplay {
+        LOW_STOCK,
+        OUT_OF_STOCK
     }
 
 }

@@ -32,8 +32,12 @@ public class InventoryController {
         return inventoryService.searchInventory(keyword);
     }
 
-    public List<Inventory> handleViewLowStockInventory(int maximumQuantity) {
-        return inventoryService.getLowStockInventory(maximumQuantity);
+    public List<Inventory> handleViewLowStockInventory() {
+        return inventoryService.getLowStockInventory();
+    }
+
+    public List<Inventory> handleViewOutOfStockInventory() {
+        return inventoryService.getOutOfStockInventory();
     }
 
     public List<Inventory> handleViewExpiringInventory(int daysAhead) {

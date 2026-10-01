@@ -31,8 +31,7 @@ public class StaffInventoryView {
                     inventoryView.searchInventory();
                     InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
-                case 4 -> CliViewUtility.pauseAfter(
-                        scanner, inventoryView.viewLowStockInventory());
+                case 4 -> inventoryView.viewLowStockInventory();
                 case 5 -> CliViewUtility.pauseAfter(
                         scanner, inventoryView.viewExpiringInventory());
                 case 0 -> { }

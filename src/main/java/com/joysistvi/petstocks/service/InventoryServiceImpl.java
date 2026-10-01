@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class InventoryServiceImpl implements InventoryService {
+    private static final int LOW_STOCK_THRESHOLD = 10;
     private static final int MAX_BATCH_CODE_LENGTH = 100;
     private static final int MAX_REMARK_LENGTH = 250;
 
@@ -67,13 +68,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public List<Inventory> getLowStockInventory(int maximumQuantity) {
-        if (maximumQuantity < 0) {
-            System.out.println("Low-stock quantity cannot be negative.");
-            return List.of();
-        }
+    public List<Inventory> getLowStockInventory() {
+        return inventoryRepo.getLowStockInventory(LOW_STOCK_THRESHOLD);
+    }
 
-        return inventoryRepo.getLowStockInventory(maximumQuantity);
+    @Override
+    public List<Inventory> getOutOfStockInventory() {
+        return inventoryRepo.getOutOfStockInventory();
     }
 
     @Override
