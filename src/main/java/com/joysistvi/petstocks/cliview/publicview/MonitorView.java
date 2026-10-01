@@ -25,8 +25,7 @@ public class MonitorView {
             choice = InputUtility.readInt(scanner, "Choice: ");
 
             switch (choice) {
-                case 1 -> CliViewUtility.pauseAfter(
-                        scanner, inventoryView.viewLowStockInventory());
+                case 1 -> inventoryView.viewLowStockInventory();
                 case 2 -> CliViewUtility.pauseAfter(
                         scanner, inventoryView.viewExpiringInventory());
                 case 0 -> { }
