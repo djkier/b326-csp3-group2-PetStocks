@@ -36,20 +36,35 @@ public class StaffMainView {
             printMenu();
             choice = InputUtility.readInt(scanner, "Choice: ");
 
-            switch (choice) {
-                case 1 -> staffInventoryView.run();
-                case 2 -> CliViewUtility.pauseAfter(
-                        scanner, restockView.recordStockIn(currentUser));
-                case 3 -> CliViewUtility.pauseAfter(
-                        scanner, dispatchView.recordStockOut(currentUser));
-                case 4 -> stockMovementView.run();
-                case 0 -> System.out.println("Logging out...");
-                default -> {
-                    System.out.println("Invalid menu selection.");
-                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
-                }
+            if (choice == 0) {
+                System.out.println("Logging out...");
+            } else if (!handleOperationalSelection(choice, currentUser)) {
+                System.out.println("Invalid menu selection.");
+                InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
             }
         } while (choice != 0);
+    }
+
+    public boolean handleOperationalSelection(int choice, User currentUser) {
+        switch (choice) {
+            case 1 -> staffInventoryView.run();
+            case 2 -> CliViewUtility.pauseAfter(
+                    scanner, restockView.recordStockIn(currentUser));
+            case 3 -> CliViewUtility.pauseAfter(
+                    scanner, dispatchView.recordStockOut(currentUser));
+            case 4 -> stockMovementView.run();
+            default -> {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void printOperationalOptions() {
+        System.out.println("1. Inventory");
+        System.out.println("2. Record Stock In");
+        System.out.println("3. Record Stock Out");
+        System.out.println("4. Stock Movement History");
     }
 
     private void printMenu() {
@@ -57,10 +72,7 @@ public class StaffMainView {
         System.out.println("=".repeat(HEADER_WIDTH));
         System.out.println("Staff Menu");
         System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("1. Inventory");
-        System.out.println("2. Record Stock In");
-        System.out.println("3. Record Stock Out");
-        System.out.println("4. Stock Movement History");
+        printOperationalOptions();
         System.out.println("0. Logout");
     }
 }
