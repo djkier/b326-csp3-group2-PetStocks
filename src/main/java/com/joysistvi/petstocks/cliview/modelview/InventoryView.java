@@ -319,10 +319,10 @@ public class InventoryView {
 
         String currentRemark = current.getRemark() == null ? "" : current.getRemark();
         System.out.print("New remark [" + currentRemark +
-                "] (Enter to keep, type NONE to clear): ");
+                "] (Enter for none, type KEEP to retain): ");
         String remarkInput = scanner.nextLine();
-        String remark = "NONE".equalsIgnoreCase(remarkInput.trim())
-                ? null : CliViewUtility.keepCurrentIfBlank(remarkInput, current.getRemark());
+        String remark = "KEEP".equalsIgnoreCase(remarkInput.trim())
+                ? current.getRemark() : remarkInput;
 
         Inventory inventory = new Inventory(
                 id, product, quantity, expiration, batchCode, remark);

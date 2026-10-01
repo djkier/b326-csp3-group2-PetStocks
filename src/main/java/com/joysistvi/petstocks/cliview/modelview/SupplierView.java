@@ -139,7 +139,7 @@ public class SupplierView {
         String address = scanner.nextLine();
         System.out.print("Contact number: ");
         String contactNumber = scanner.nextLine();
-        System.out.print("Email: ");
+        System.out.print("Email (optional): ");
         String email = scanner.nextLine();
         return new Supplier(name, address, contactNumber, email);
     }
@@ -195,8 +195,12 @@ public class SupplierView {
                 "] (Enter to keep): ");
         String contactNumber = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getContactNumber());
 
-        System.out.print("New email [" + current.getEmail() + "] (Enter to keep): ");
-        String email = CliViewUtility.keepCurrentIfBlank(scanner.nextLine(), current.getEmail());
+        String currentEmail = current.getEmail() == null ? "" : current.getEmail();
+        System.out.print("New email [" + currentEmail +
+                "] (Enter for none, type KEEP to retain): ");
+        String emailInput = scanner.nextLine();
+        String email = "KEEP".equalsIgnoreCase(emailInput.trim())
+                ? current.getEmail() : emailInput;
 
         Supplier supplier = new Supplier(id, name, address, contactNumber, email);
         boolean isSuccess = supplierController.handleUpdateSupplier(supplier);

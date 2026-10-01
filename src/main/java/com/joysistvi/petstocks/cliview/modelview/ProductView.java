@@ -200,11 +200,11 @@ public class ProductView {
 
         String currentDescription = current.getDescription() == null
                 ? "" : current.getDescription();
-        System.out.print("New description [" + currentDescription + "] (Enter to keep): ");
-        String description = scanner.nextLine();
-        if (description.trim().isEmpty()) {
-            description = current.getDescription();
-        }
+        System.out.print("New description [" + currentDescription +
+                "] (Enter for none, type KEEP to retain): ");
+        String descriptionInput = scanner.nextLine();
+        String description = "KEEP".equalsIgnoreCase(descriptionInput.trim())
+                ? current.getDescription() : descriptionInput;
 
         Category category = selectActiveCategory(current.getCategory());
         if (category == null) {
