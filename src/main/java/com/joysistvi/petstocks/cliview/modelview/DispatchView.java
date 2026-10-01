@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class DispatchView {
-    private static final DateTimeFormatter DATE_TIME_INPUT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final DateTimeFormatter DATE_TIME_DISPLAY =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -110,11 +108,8 @@ public class DispatchView {
             return false;
         }
 
-        LocalDateTime datetimeDispatched = InputUtility.readDateTimeOrNow(
-                scanner,
-                "Dispatch date/time (YYYY-MM-DD HH:mm, Enter for now, 0 to cancel): ",
-                DATE_TIME_INPUT,
-                "YYYY-MM-DD HH:mm");
+        CliViewUtility.showHeader("Dispatch Date and Time");
+        LocalDateTime datetimeDispatched = InputUtility.readDateTimeSelection(scanner);
         if (datetimeDispatched == null) {
             return false;
         }
