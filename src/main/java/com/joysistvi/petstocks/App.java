@@ -12,7 +12,6 @@ import com.joysistvi.petstocks.cliview.publicview.AdminMainView;
 import com.joysistvi.petstocks.cliview.publicview.AdminManagementView;
 import com.joysistvi.petstocks.cliview.publicview.LandingView;
 import com.joysistvi.petstocks.cliview.publicview.LoginView;
-import com.joysistvi.petstocks.cliview.publicview.MonitorView;
 import com.joysistvi.petstocks.cliview.publicview.RegistrationView;
 import com.joysistvi.petstocks.cliview.publicview.StaffInventoryView;
 import com.joysistvi.petstocks.cliview.publicview.StaffMainView;
@@ -118,15 +117,13 @@ public class App {
                     inventoryView, scanner);
             StockMovementView stockMovementView = new StockMovementView(
                     restockController, dispatchController, scanner);
-            MonitorView monitorView = new MonitorView(inventoryView, scanner);
             AdminManagementView adminManagementView = new AdminManagementView(
                     productView, categoryView, supplierView, petTypeView, userView, scanner);
             StaffMainView staffMainView = new StaffMainView(
                     staffInventoryView, restockView, dispatchView,
                     stockMovementView, scanner);
             AdminMainView adminMainView = new AdminMainView(
-                    staffInventoryView, restockView, dispatchView,
-                    stockMovementView, monitorView, adminManagementView, scanner);
+                    staffMainView, adminManagementView, scanner);
             LoginView loginView = new LoginView(userController, scanner);
             RegistrationView registrationView = new RegistrationView(userController, scanner);
             LandingView landingView = new LandingView(scanner);
