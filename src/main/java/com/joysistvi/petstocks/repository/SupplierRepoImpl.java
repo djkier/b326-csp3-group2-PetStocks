@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,7 +108,7 @@ public class SupplierRepoImpl implements SupplierRepo {
             prep.setString(1, supplier.getName());
             prep.setString(2, supplier.getAddress());
             prep.setString(3, supplier.getContactNumber());
-            prep.setString(4, supplier.getEmail());
+            setNullableEmail(prep, 4, supplier.getEmail());
             if (prep.executeUpdate() != 1) {
                 return false;
             }
@@ -136,7 +137,7 @@ public class SupplierRepoImpl implements SupplierRepo {
             prep.setString(1, supplier.getName());
             prep.setString(2, supplier.getAddress());
             prep.setString(3, supplier.getContactNumber());
-            prep.setString(4, supplier.getEmail());
+            setNullableEmail(prep, 4, supplier.getEmail());
             prep.setInt(5, supplier.getId());
             return prep.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -229,5 +230,14 @@ public class SupplierRepoImpl implements SupplierRepo {
                 result.getString("email"),
                 result.getBoolean("is_archived")
         );
+    }
+
+    private void setNullableEmail(PreparedStatement prep, int parameterIndex,
+                                  String email) throws SQLException {
+        if (email == null) {
+            prep.setNull(parameterIndex, Types.VARCHAR);
+        } else {
+            prep.setString(parameterIndex, email);
+        }
     }
 }

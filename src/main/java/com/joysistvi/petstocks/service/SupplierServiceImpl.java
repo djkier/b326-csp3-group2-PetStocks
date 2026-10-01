@@ -158,7 +158,11 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     private boolean validateEmail(String email) {
-        if (!validateRequiredField(email, "Supplier email", MAX_EMAIL_LENGTH)) {
+        if (email == null || email.trim().isEmpty()) {
+            return true;
+        }
+        if (email.trim().length() > MAX_EMAIL_LENGTH) {
+            System.out.println("Supplier email cannot exceed 50 characters.");
             return false;
         }
         if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
@@ -172,7 +176,10 @@ public class SupplierServiceImpl implements SupplierService {
         supplier.setName(supplier.getName().trim());
         supplier.setAddress(supplier.getAddress().trim());
         supplier.setContactNumber(supplier.getContactNumber().trim());
-        supplier.setEmail(supplier.getEmail().trim());
+        if (supplier.getEmail() != null) {
+            String email = supplier.getEmail().trim();
+            supplier.setEmail(email.isEmpty() ? null : email);
+        }
     }
 
     private boolean isValidId(int id, String operation) {
