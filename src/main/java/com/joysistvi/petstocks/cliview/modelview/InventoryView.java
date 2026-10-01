@@ -160,19 +160,18 @@ public class InventoryView {
         int currentPage = 0;
 
         while (true) {
-            List<Inventory> inventory;
-            switch (display) {
+            List<Inventory> inventory = switch (display) {
                 case LOW_STOCK -> {
                     CliViewUtility.showHeader("Low-Stock Inventory");
                     System.out.println("Showing inventory with stock quantities below 10.");
-                    inventory = inventoryController.handleViewLowStockInventory();
+                    yield inventoryController.handleViewLowStockInventory();
                 }
                 case OUT_OF_STOCK -> {
                     CliViewUtility.showHeader("Out-of-Stock Inventory");
                     System.out.println("Showing out-of-stock inventory.");
-                    inventory = inventoryController.handleViewOutOfStockInventory();
+                    yield inventoryController.handleViewOutOfStockInventory();
                 }
-            }
+            };
 
             currentPage = CliViewUtility.normalizePage(currentPage, inventory.size());
             printInventory(CliViewUtility.page(inventory, currentPage));
@@ -204,17 +203,16 @@ public class InventoryView {
         int currentPage = 0;
 
         while (true) {
-            List<Inventory> inventory;
-            switch (display) {
+            List<Inventory> inventory = switch (display) {
                 case EXPIRED -> {
                     CliViewUtility.showHeader("Expired Inventory");
-                    inventory = inventoryController.handleViewExpiredInventory();
+                    yield inventoryController.handleViewExpiredInventory();
                 }
                 case EXPIRING -> {
                     CliViewUtility.showHeader("Inventory Expiring Within 60 Days");
-                    inventory = inventoryController.handleViewExpiringInventory();
+                    yield inventoryController.handleViewExpiringInventory();
                 }
-            }
+            };
 
             currentPage = CliViewUtility.normalizePage(currentPage, inventory.size());
             printInventory(CliViewUtility.page(inventory, currentPage));
