@@ -80,7 +80,7 @@ public class InventoryView {
         System.out.println("0. Back");
     }
 
-    private void viewAllInventory() {
+    public void viewAllInventory() {
         String sortBy = "id";
         int choice;
 
@@ -101,7 +101,7 @@ public class InventoryView {
         } while (choice != 0);
     }
 
-    private boolean findInventoryById() {
+    public boolean findInventoryById() {
         CliViewUtility.showHeader("Find Inventory By ID");
         int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (id == 0) {
@@ -126,14 +126,14 @@ public class InventoryView {
         return true;
     }
 
-    private void searchInventory() {
+    public void searchInventory() {
         CliViewUtility.showHeader("Search Inventory");
         System.out.print("Enter product, brand, batch code, or remark: ");
         String keyword = scanner.nextLine();
         printInventory(inventoryController.searchInventory(keyword));
     }
 
-    private boolean viewLowStockInventory() {
+    public boolean viewLowStockInventory() {
         CliViewUtility.showHeader("Low-Stock Inventory");
         int maximumQuantity = InputUtility.readInt(scanner,
                 "Maximum batch quantity (0 includes out-of-stock, -1 to cancel): ");
@@ -145,7 +145,7 @@ public class InventoryView {
         return true;
     }
 
-    private boolean viewExpiringInventory() {
+    public boolean viewExpiringInventory() {
         CliViewUtility.showHeader("Expiring Inventory");
         int daysAhead = InputUtility.readInt(scanner, "Show batches expiring within how many days? (-1 to cancel): ");
         if (daysAhead == -1) {
