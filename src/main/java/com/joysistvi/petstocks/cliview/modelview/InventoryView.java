@@ -22,6 +22,7 @@ public class InventoryView {
     private static final int BATCH_DISPLAY_WIDTH = 14;
     private static final int REMARK_DISPLAY_WIDTH = 20;
     private static final int STATUS_DISPLAY_WIDTH = 10;
+    private static final int MOVEMENT_DISPLAY_WIDTH = 10;
 
     private final InventoryController inventoryController;
     private final ProductController productController;
@@ -550,6 +551,34 @@ public class InventoryView {
                     item.getQuantity(),
                     CliViewUtility.truncate(item.getBatchCode(), BATCH_DISPLAY_WIDTH));
         }
+        System.out.println(border);
+    }
+
+    public void printStockResult(Inventory inventory, int movementQuantity,
+                                 String movementLabel) {
+        String border = "+" + "-".repeat(ID_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(PRODUCT_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(BRAND_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(QUANTITY_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(BATCH_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(MOVEMENT_DISPLAY_WIDTH + 2) + "+";
+        String rowFormat = "| %-" + ID_DISPLAY_WIDTH + "s | %-"
+                + PRODUCT_DISPLAY_WIDTH + "s | %-" + BRAND_DISPLAY_WIDTH + "s | %-"
+                + QUANTITY_DISPLAY_WIDTH + "s | %-" + BATCH_DISPLAY_WIDTH + "s | %-"
+                + MOVEMENT_DISPLAY_WIDTH + "s |%n";
+        Product product = inventory.getProduct();
+
+        System.out.println(border);
+        System.out.printf(rowFormat, "ID", "Product", "Brand", "Quantity", "Batch Code",
+                movementLabel);
+        System.out.println(border);
+        System.out.printf(rowFormat,
+                inventory.getId(),
+                CliViewUtility.truncate(product.getName(), PRODUCT_DISPLAY_WIDTH),
+                CliViewUtility.truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
+                inventory.getQuantity(),
+                CliViewUtility.truncate(inventory.getBatchCode(), BATCH_DISPLAY_WIDTH),
+                movementQuantity);
         System.out.println(border);
     }
 
