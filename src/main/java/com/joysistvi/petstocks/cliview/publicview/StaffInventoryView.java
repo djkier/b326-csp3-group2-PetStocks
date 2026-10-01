@@ -41,7 +41,7 @@ public class StaffInventoryView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Inventory");
+        CliViewUtility.showScreen("Inventory");
         System.out.println("1. View All Inventory");
         System.out.println("2. Find Inventory by ID");
         System.out.println("3. Search Inventory");

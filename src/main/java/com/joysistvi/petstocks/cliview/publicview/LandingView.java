@@ -26,12 +26,13 @@ public class LandingView {
                     return Selection.EXIT;
                 default:
                     System.out.println("Invalid menu selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
             }
         }
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("PetStock");
+        CliViewUtility.showScreen("PetStock");
         System.out.println("1. Login");
         System.out.println("2. Register");
         System.out.println("0. Exit");

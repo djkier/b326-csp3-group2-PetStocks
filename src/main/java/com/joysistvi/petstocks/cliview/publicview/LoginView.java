@@ -35,6 +35,7 @@ public class LoginView {
             }
 
             System.out.println("Invalid username or password.");
+            InputUtility.pressEnterToContinue(scanner, "Press Enter to try again...");
         }
     }
 
@@ -46,7 +47,7 @@ public class LoginView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Login");
+        CliViewUtility.showScreen("Login");
         System.out.println("Enter 0 as the username to go back.");
     }
 }

@@ -38,7 +38,7 @@ public class AdminMainView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Administrator Menu");
+        CliViewUtility.showScreen("Administrator Menu");
         staffMainView.printOperationalOptions();
         System.out.println("5. Admin Management");
         System.out.println("0. Logout");
