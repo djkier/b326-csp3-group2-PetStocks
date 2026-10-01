@@ -66,21 +66,27 @@ public class ProductView {
 
     private void viewAllProducts() {
         String sortBy = "id";
-        int choice;
+        int currentPage = 0;
 
-        do {
+        while (true) {
+            List<Product> products = productController.handleViewAllProducts(sortBy);
+            currentPage = CliViewUtility.normalizePage(currentPage, products.size());
             CliViewUtility.showHeader("Active Products");
-            printProducts(productController.handleViewAllProducts(sortBy));
+            printProducts(CliViewUtility.page(products, currentPage));
+            CliViewUtility.printPagination(currentPage, products.size());
             printSortOptions();
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1 -> sortBy = "id";
-                case 2 -> sortBy = "name";
-                case 0 -> { }
+                case "1" -> { sortBy = "id"; currentPage = 0; }
+                case "2" -> { sortBy = "name"; currentPage = 0; }
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, products.size());
+                case "0" -> { return; }
                 default -> System.out.println("Invalid sort selection.");
             }
-        } while (choice != 0);
+        }
     }
 
     private boolean findProductById() {
@@ -92,7 +98,7 @@ public class ProductView {
 
         Product product = productController.handleGetProductById(id);
         if (product != null) {
-            printProducts(List.of(product));
+            CliViewUtility.browsePages(List.of(product), scanner, this::printProducts);
         }
         return true;
     }
@@ -101,7 +107,8 @@ public class ProductView {
         CliViewUtility.showHeader("Search Products");
         System.out.print("Enter product name, brand, description, or category: ");
         String keyword = scanner.nextLine();
-        printProducts(productController.searchProducts(keyword));
+        CliViewUtility.browsePages(
+                productController.searchProducts(keyword), scanner, this::printProducts);
     }
 
     private boolean createProduct() {
@@ -114,7 +121,8 @@ public class ProductView {
 
         if (isSuccess) {
             System.out.println();
-            printProducts(productController.handleViewAllProducts("id"));
+            CliViewUtility.browsePages(
+                    productController.handleViewAllProducts("id"), scanner, this::printProducts);
         }
         return true;
     }
@@ -176,7 +184,8 @@ public class ProductView {
 
     private boolean updateProduct() {
         CliViewUtility.showHeader("Update Product");
-        printProducts(productController.handleViewAllProducts("id"));
+        CliViewUtility.browsePages(
+                productController.handleViewAllProducts("id"), scanner, this::printProducts);
 
         int id = InputUtility.readInt(scanner, "Product ID to update (0 to cancel): ");
         if (id == 0) {
@@ -219,14 +228,16 @@ public class ProductView {
 
         if (isSuccess) {
             System.out.println();
-            printProducts(productController.handleViewAllProducts("id"));
+            CliViewUtility.browsePages(
+                    productController.handleViewAllProducts("id"), scanner, this::printProducts);
         }
         return true;
     }
 
     private boolean archiveProduct() {
         CliViewUtility.showHeader("Archive Product");
-        printProducts(productController.handleViewAllProducts("id"));
+        CliViewUtility.browsePages(
+                productController.handleViewAllProducts("id"), scanner, this::printProducts);
         int id = InputUtility.readInt(scanner, "Product ID to archive (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -241,7 +252,8 @@ public class ProductView {
 
     private boolean restoreProduct() {
         CliViewUtility.showHeader("Restore Product");
-        printProducts(productController.handleViewArchivedProducts("id"));
+        CliViewUtility.browsePages(
+                productController.handleViewArchivedProducts("id"), scanner, this::printProducts);
         int id = InputUtility.readInt(scanner, "Product ID to restore (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -256,26 +268,33 @@ public class ProductView {
 
     private void viewAllArchivedProducts() {
         String sortBy = "id";
-        int choice;
+        int currentPage = 0;
 
-        do {
+        while (true) {
+            List<Product> products = productController.handleViewArchivedProducts(sortBy);
+            currentPage = CliViewUtility.normalizePage(currentPage, products.size());
             CliViewUtility.showHeader("Archived Products");
-            printProducts(productController.handleViewArchivedProducts(sortBy));
+            printProducts(CliViewUtility.page(products, currentPage));
+            CliViewUtility.printPagination(currentPage, products.size());
             printSortOptions();
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1 -> sortBy = "id";
-                case 2 -> sortBy = "name";
-                case 0 -> { }
+                case "1" -> { sortBy = "id"; currentPage = 0; }
+                case "2" -> { sortBy = "name"; currentPage = 0; }
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, products.size());
+                case "0" -> { return; }
                 default -> System.out.println("Invalid sort selection.");
             }
-        } while (choice != 0);
+        }
     }
 
     private boolean deleteProduct() {
         CliViewUtility.showHeader("Delete Archived Product");
-        printProducts(productController.handleViewArchivedProducts("id"));
+        CliViewUtility.browsePages(
+                productController.handleViewArchivedProducts("id"), scanner, this::printProducts);
         int id = InputUtility.readInt(scanner, "Archived product ID to delete permanently (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -330,7 +349,7 @@ public class ProductView {
             return null;
         }
 
-        printCategoryChoices(categories);
+        CliViewUtility.browsePages(categories, scanner, this::printCategoryChoices);
 
         while (true) {
             if (currentCategory == null) {
@@ -396,11 +415,6 @@ public class ProductView {
     }
 
     public void printProducts(List<Product> products) {
-        if (products.isEmpty()) {
-            System.out.println("No products found.");
-            return;
-        }
-
         String border = "+" + "-".repeat(6) + "+" + "-".repeat(NAME_DISPLAY_WIDTH + 2)
                 + "+" + "-".repeat(BRAND_DISPLAY_WIDTH + 2)
                 + "+" + "-".repeat(DESCRIPTION_DISPLAY_WIDTH + 2)
@@ -410,6 +424,12 @@ public class ProductView {
         System.out.printf("| %-4s | %-25s | %-20s | %-40s | %-25s | %-10s |%n",
                 "ID", "Name", "Brand", "Description", "Category", "Status");
         System.out.println(border);
+
+        if (products.isEmpty()) {
+            System.out.println("No products found.");
+            System.out.println(border);
+            return;
+        }
 
         for (Product product : products) {
             String description = product.getDescription() == null ? "" : product.getDescription();

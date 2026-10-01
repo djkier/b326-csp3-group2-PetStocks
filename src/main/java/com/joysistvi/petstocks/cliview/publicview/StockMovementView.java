@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class StockMovementView {
-    private static final int RECORDS_PER_PAGE = 10;
     private static final DateTimeFormatter DATE_TIME_DISPLAY =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -37,10 +36,10 @@ public class StockMovementView {
 
         while (true) {
             List<StockMovement> filteredMovements = filterMovements(allMovements, filter);
-            int totalPages = calculateTotalPages(filteredMovements.size());
-            currentPage = Math.min(currentPage, totalPages - 1);
+            currentPage = CliViewUtility.normalizePage(
+                    currentPage, filteredMovements.size());
 
-            printPage(filteredMovements, filter, currentPage, totalPages);
+            printPage(filteredMovements, filter, currentPage);
             System.out.print("Choice: ");
             String choice = scanner.nextLine().trim().toUpperCase();
 
@@ -57,20 +56,9 @@ public class StockMovementView {
                     filter = MovementFilter.STOCK_OUT;
                     currentPage = 0;
                 }
-                case "P" -> {
-                    if (currentPage > 0) {
-                        currentPage--;
-                    } else {
-                        System.out.println("Already on the first page.");
-                    }
-                }
-                case "N" -> {
-                    if (currentPage < totalPages - 1) {
-                        currentPage++;
-                    } else {
-                        System.out.println("Already on the last page.");
-                    }
-                }
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
+                case "N" -> currentPage = CliViewUtility.nextPage(
+                        currentPage, filteredMovements.size());
                 case "0" -> {
                     return;
                 }
@@ -119,32 +107,19 @@ public class StockMovementView {
                 .toList();
     }
 
-    private int calculateTotalPages(int recordCount) {
-        return Math.max(1, (recordCount + RECORDS_PER_PAGE - 1) / RECORDS_PER_PAGE);
-    }
-
     private void printPage(List<StockMovement> movements, MovementFilter filter,
-                           int currentPage, int totalPages) {
+                           int currentPage) {
         CliViewUtility.showHeader("Stock Movement History");
         System.out.println("Filter: " + filter.displayName());
         System.out.println();
 
-        int fromIndex = currentPage * RECORDS_PER_PAGE;
-        int toIndex = Math.min(fromIndex + RECORDS_PER_PAGE, movements.size());
-        printMovements(movements.subList(fromIndex, toIndex));
+        printMovements(CliViewUtility.page(movements, currentPage));
 
-        System.out.println();
-        System.out.printf("[P] Previous        Page %d of %d        [N] Next%n",
-                currentPage + 1, totalPages);
+        CliViewUtility.printPagination(currentPage, movements.size());
         System.out.println("[1] All    [2] Stock In    [3] Stock Out    [0] Back");
     }
 
     private void printMovements(List<StockMovement> movements) {
-        if (movements.isEmpty()) {
-            System.out.println("No stock movements found.");
-            return;
-        }
-
         String border = "+" + "-".repeat(18) + "+" + "-".repeat(11)
                 + "+" + "-".repeat(27) + "+" + "-".repeat(18)
                 + "+" + "-".repeat(10) + "+" + "-".repeat(20) + "+";
@@ -154,6 +129,11 @@ public class StockMovementView {
         System.out.printf(rowFormat,
                 "Date / Time", "Type", "Product", "Batch Code", "Quantity", "User");
         System.out.println(border);
+        if (movements.isEmpty()) {
+            System.out.println("No stock movements found.");
+            System.out.println(border);
+            return;
+        }
         for (StockMovement movement : movements) {
             System.out.printf(rowFormat,
                     movement.dateTime().format(DATE_TIME_DISPLAY),
