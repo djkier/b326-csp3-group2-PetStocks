@@ -4,6 +4,7 @@ import com.joysistvi.petstocks.controller.InventoryController;
 import com.joysistvi.petstocks.controller.RestockController;
 import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.model.Inventory;
+import com.joysistvi.petstocks.model.Product;
 import com.joysistvi.petstocks.model.Restock;
 import com.joysistvi.petstocks.model.Supplier;
 import com.joysistvi.petstocks.model.User;
@@ -27,14 +28,24 @@ public class RestockView {
     private final RestockController restockController;
     private final InventoryController inventoryController;
     private final SupplierController supplierController;
+    private final ProductView productView;
+    private final InventoryView inventoryView;
+    private final SupplierView supplierView;
     private final Scanner scanner;
 
     public RestockView(RestockController restockController,
                        InventoryController inventoryController,
-                       SupplierController supplierController, Scanner scanner) {
+                       SupplierController supplierController,
+                       ProductView productView,
+                       InventoryView inventoryView,
+                       SupplierView supplierView,
+                       Scanner scanner) {
         this.restockController = restockController;
         this.inventoryController = inventoryController;
         this.supplierController = supplierController;
+        this.productView = productView;
+        this.inventoryView = inventoryView;
+        this.supplierView = supplierView;
         this.scanner = scanner;
     }
 
@@ -89,7 +100,7 @@ public class RestockView {
     private boolean recordStockIn(User currentUser, boolean promptForUser) {
         CliViewUtility.showHeader("Record Stock In");
 
-        Inventory inventory = selectInventory();
+        Inventory inventory = selectStockInInventory();
         if (inventory == null) {
             return false;
         }
@@ -144,6 +155,48 @@ public class RestockView {
         return true;
     }
 
+    private Inventory selectStockInInventory() {
+        List<Inventory> inventory = inventoryController.handleViewAllInventory();
+        System.out.println();
+        inventoryView.printInventory(inventory);
+
+        while (true) {
+            System.out.println();
+            System.out.println("[1] Select Inventory ID");
+            System.out.println("[2] Product Not Found / Add New Product");
+            System.out.println("[0] Cancel");
+            int choice = InputUtility.readInt(scanner, "Choice: ");
+
+            switch (choice) {
+                case 1:
+                    if (inventory.isEmpty()) {
+                        System.out.println("No inventory records are available to select.");
+                        break;
+                    }
+                    return selectInventoryById(inventory);
+                case 2:
+                    return createNewProductInventory();
+                case 0:
+                    return null;
+                default:
+                    System.out.println("Invalid menu selection.");
+            }
+        }
+    }
+
+    private Inventory createNewProductInventory() {
+        Product product = productView.createProductForStockIn();
+        if (product == null) {
+            return null;
+        }
+
+        Inventory inventory = inventoryView.createInitialInventory(product);
+        if (inventory == null) {
+            System.out.println("Stock-in cancelled before a restock was created.");
+        }
+        return inventory;
+    }
+
     private void viewRestockHistory() {
         String sortBy = "date";
         int choice;
@@ -184,7 +237,7 @@ public class RestockView {
 
     private boolean viewRestocksByInventory() {
         CliViewUtility.showHeader("Restocks By Inventory");
-        printInventoryChoices(inventoryController.handleViewAllInventory("id"));
+//        printInventoryChoices(inventoryController.handleViewAllInventory("id"));
         int inventoryId = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (inventoryId == 0) {
             return false;
@@ -199,7 +252,7 @@ public class RestockView {
         List<Supplier> suppliers = new ArrayList<>(
                 supplierController.handleViewAllSuppliers("id"));
         suppliers.addAll(supplierController.handleViewArchivedSuppliers("id"));
-        printSupplierChoices(suppliers);
+//        printSupplierChoices(suppliers);
 
         int supplierId = InputUtility.readInt(scanner, "Supplier ID (0 to cancel): ");
         if (supplierId == 0) {
@@ -252,19 +305,9 @@ public class RestockView {
         return true;
     }
 
-    private Inventory selectInventory() {
-        List<Inventory> inventory = inventoryController.handleViewAllInventory("id");
-        if (inventory.isEmpty()) {
-            System.out.println("No inventory records are available.");
-            return null;
-        }
-
-        printInventoryChoices(inventory);
+    private Inventory selectInventoryById(List<Inventory> inventory) {
         while (true) {
-            int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
-            if (id == 0) {
-                return null;
-            }
+            int id = InputUtility.readInt(scanner, "Inventory ID: ");
             for (Inventory item : inventory) {
                 if (item.getId() == id) {
                     return item;
@@ -275,20 +318,39 @@ public class RestockView {
     }
 
     private Supplier selectActiveSupplier() {
-        List<Supplier> suppliers = supplierController.handleViewAllSuppliers("id");
-        if (suppliers.isEmpty()) {
-            System.out.println("No active suppliers are available.");
-            return null;
-        }
+        CliViewUtility.showHeader("Select Supplier");
+        List<Supplier> suppliers = supplierController.handleViewAllSuppliers();
+        supplierView.printSuppliers(suppliers);
 
-        printSupplierChoices(suppliers);
         while (true) {
-            int id = InputUtility.readInt(scanner, "Supplier ID (0 to cancel): ");
-            if (id == 0) {
-                return null;
+            System.out.println();
+            System.out.println("[1] Select Supplier ID");
+            System.out.println("[2] Add Custom Supplier");
+            System.out.println("[0] Cancel");
+            int choice = InputUtility.readInt(scanner, "Choice: ");
+
+            switch (choice) {
+                case 1:
+                    if (suppliers.isEmpty()) {
+                        System.out.println("No active suppliers are available to select.");
+                        break;
+                    }
+                    return selectSupplierById(suppliers);
+                case 2:
+                    return supplierView.createSupplierForStockIn();
+                case 0:
+                    return null;
+                default:
+                    System.out.println("Invalid menu selection.");
             }
+        }
+    }
+
+    private Supplier selectSupplierById(List<Supplier> suppliers) {
+        while (true) {
+            int id = InputUtility.readInt(scanner, "Supplier ID: ");
             for (Supplier supplier : suppliers) {
-                if (supplier.getId() == id) {
+                if (supplier.getId() == id && !supplier.isArchived()) {
                     return supplier;
                 }
             }
@@ -343,36 +405,6 @@ public class RestockView {
                     restock.getQuantityDelivered());
         }
         System.out.println(border);
-    }
-
-    private void printInventoryChoices(List<Inventory> inventory) {
-        if (inventory.isEmpty()) {
-            System.out.println("No inventory records found.");
-            return;
-        }
-
-        System.out.printf("%-6s %-22s %-16s %-10s%n", "ID", "Product", "Batch Code", "Stock");
-        for (Inventory item : inventory) {
-            System.out.printf("%-6d %-22s %-16s %-10d%n",
-                    item.getId(),
-                    CliViewUtility.truncate(item.getProduct().getName(), 22),
-                    CliViewUtility.truncate(item.getBatchCode(), 16),
-                    item.getQuantity());
-        }
-    }
-
-    private void printSupplierChoices(List<Supplier> suppliers) {
-        if (suppliers.isEmpty()) {
-            System.out.println("No suppliers found.");
-            return;
-        }
-
-        System.out.printf("%-6s %-28s %-10s%n", "ID", "Supplier", "Status");
-        for (Supplier supplier : suppliers) {
-            System.out.printf("%-6d %-28s %-10s%n",
-                    supplier.getId(), CliViewUtility.truncate(supplier.getName(), 28),
-                    CliViewUtility.formatArchiveStatus(supplier.isArchived()));
-        }
     }
 
     private void printUserChoices(Map<Integer, String> users) {

@@ -105,30 +105,73 @@ public class ProductView {
     }
 
     private boolean createProduct() {
-        CliViewUtility.showHeader("Create Product");
-        System.out.print("Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Brand: ");
-        String brand = scanner.nextLine();
-        System.out.print("Description (optional): ");
-        String description = scanner.nextLine();
-
-        Category category = selectActiveCategory(null);
-        if (category == null) {
+        Product product = promptForNewProduct("Create Product", false);
+        if (product == null) {
             return false;
         }
 
-        Product product = new Product(name, brand, description, category);
-        boolean isSuccess = productController.handleCreateProduct(product);
-        System.out.println(isSuccess
-                ? "Product created successfully."
-                : "Failed to create product.");
+        boolean isSuccess = saveNewProduct(product);
 
         if (isSuccess) {
             System.out.println();
             printProducts(productController.handleViewAllProducts("id"));
         }
         return true;
+    }
+
+    public Product createProductForStockIn() {
+        while (true) {
+            Product product = promptForNewProduct("Add New Product", true);
+            if (product == null) {
+                return null;
+            }
+            if (saveNewProduct(product)) {
+                return product;
+            }
+            if (!promptToRetry("Product creation failed.")) {
+                return null;
+            }
+        }
+    }
+
+    private Product promptForNewProduct(String title, boolean allowImmediateCancel) {
+        CliViewUtility.showHeader(title);
+        System.out.print(allowImmediateCancel ? "Name (0 to cancel): " : "Name: ");
+        String name = scanner.nextLine();
+        if (allowImmediateCancel && "0".equals(name.trim())) {
+            return null;
+        }
+
+        System.out.print("Brand: ");
+        String brand = scanner.nextLine();
+        System.out.print("Description (optional): ");
+        String description = scanner.nextLine();
+
+        Category category = selectActiveCategory(null);
+        return category == null ? null : new Product(name, brand, description, category);
+    }
+
+    private boolean saveNewProduct(Product product) {
+        boolean isSuccess = productController.handleCreateProduct(product);
+        System.out.println(isSuccess
+                ? "Product created successfully."
+                : "Failed to create product.");
+        return isSuccess;
+    }
+
+    private boolean promptToRetry(String message) {
+        while (true) {
+            System.out.println(message);
+            System.out.println("[1] Retry    [0] Cancel");
+            int choice = InputUtility.readInt(scanner, "Choice: ");
+            if (choice == 1) {
+                return true;
+            }
+            if (choice == 0) {
+                return false;
+            }
+            System.out.println("Invalid menu selection.");
+        }
     }
 
     private boolean updateProduct() {

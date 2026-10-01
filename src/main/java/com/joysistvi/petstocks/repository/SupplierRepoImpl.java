@@ -101,13 +101,23 @@ public class SupplierRepoImpl implements SupplierRepo {
                 "(name, address, contact_number, email, is_archived) VALUES (?, ?, ?, ?, 0)";
 
         try (Connection conn = dbConnection.getConnection();
-             PreparedStatement prep = conn.prepareStatement(query)) {
+             PreparedStatement prep = conn.prepareStatement(
+                     query, Statement.RETURN_GENERATED_KEYS)) {
 
             prep.setString(1, supplier.getName());
             prep.setString(2, supplier.getAddress());
             prep.setString(3, supplier.getContactNumber());
             prep.setString(4, supplier.getEmail());
-            return prep.executeUpdate() > 0;
+            if (prep.executeUpdate() != 1) {
+                return false;
+            }
+
+            try (ResultSet keys = prep.getGeneratedKeys()) {
+                if (keys.next()) {
+                    supplier.setId(keys.getInt(1));
+                }
+            }
+            return supplier.getId() > 0;
         } catch (SQLException e) {
             System.err.println("Create Supplier Error: " + e.getMessage());
         }

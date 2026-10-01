@@ -111,13 +111,23 @@ public class ProductRepoImpl implements ProductRepo {
                 "(name, brand, description, is_archived, category_id) VALUES (?, ?, ?, 0, ?)";
 
         try (Connection conn = dbConnection.getConnection();
-             PreparedStatement prep = conn.prepareStatement(query)) {
+             PreparedStatement prep = conn.prepareStatement(
+                     query, Statement.RETURN_GENERATED_KEYS)) {
 
             prep.setString(1, product.getName());
             prep.setString(2, product.getBrand());
             setNullableDescription(prep, 3, product.getDescription());
             prep.setInt(4, product.getCategory().getId());
-            return prep.executeUpdate() > 0;
+            if (prep.executeUpdate() != 1) {
+                return false;
+            }
+
+            try (ResultSet keys = prep.getGeneratedKeys()) {
+                if (keys.next()) {
+                    product.setId(keys.getInt(1));
+                }
+            }
+            return product.getId() > 0;
         } catch (SQLException e) {
             System.err.println("Create Product Error: " + e.getMessage());
         }
