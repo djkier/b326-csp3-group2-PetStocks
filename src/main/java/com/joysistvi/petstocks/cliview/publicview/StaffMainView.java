@@ -15,20 +15,17 @@ public class StaffMainView {
     private final RestockView restockView;
     private final DispatchView dispatchView;
     private final StockMovementView stockMovementView;
-    private final MonitorView monitorView;
     private final Scanner scanner;
 
     public StaffMainView(StaffInventoryView staffInventoryView,
                          RestockView restockView,
                          DispatchView dispatchView,
                          StockMovementView stockMovementView,
-                         MonitorView monitorView,
                          Scanner scanner) {
         this.staffInventoryView = staffInventoryView;
         this.restockView = restockView;
         this.dispatchView = dispatchView;
         this.stockMovementView = stockMovementView;
-        this.monitorView = monitorView;
         this.scanner = scanner;
     }
 
@@ -46,7 +43,6 @@ public class StaffMainView {
                 case 3 -> CliViewUtility.pauseAfter(
                         scanner, dispatchView.recordStockOut(currentUser));
                 case 4 -> stockMovementView.run();
-                case 5 -> monitorView.run();
                 case 0 -> System.out.println("Logging out...");
                 default -> {
                     System.out.println("Invalid menu selection.");
@@ -65,7 +61,6 @@ public class StaffMainView {
         System.out.println("2. Record Stock In");
         System.out.println("3. Record Stock Out");
         System.out.println("4. Stock Movement History");
-        System.out.println("5. Monitor Inventory");
         System.out.println("0. Logout");
     }
 }

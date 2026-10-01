@@ -121,7 +121,7 @@ public class App {
                     productView, categoryView, supplierView, petTypeView, userView, scanner);
             StaffMainView staffMainView = new StaffMainView(
                     staffInventoryView, restockView, dispatchView,
-                    stockMovementView, monitorView, scanner);
+                    stockMovementView, scanner);
             AdminMainView adminMainView = new AdminMainView(
                     staffInventoryView, restockView, dispatchView,
                     stockMovementView, monitorView, adminManagementView, scanner);
