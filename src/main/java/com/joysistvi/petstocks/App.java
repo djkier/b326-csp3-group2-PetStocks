@@ -155,20 +155,16 @@ public class App {
     private static void runLoginWorkflow(LoginView loginView,
                                          StaffMainView staffMainView,
                                          AdminMainView adminMainView) {
-        while (true) {
-            User currentUser = loginView.promptForLogin();
-            if (currentUser == null) {
-                return;
-            }
+        User currentUser = loginView.promptForLogin();
+        if (currentUser == null) {
+            return;
+        }
 
-            loginView.showWelcome(currentUser);
-            switch (currentUser.getRole()) {
-                case "STAFF" -> staffMainView.run(currentUser);
-                case "ADMIN" -> adminMainView.run(currentUser);
-                default -> System.out.println("Invalid username or password.");
-            }
-
-            currentUser = null;
+        loginView.showWelcome(currentUser);
+        switch (currentUser.getRole()) {
+            case "STAFF" -> staffMainView.run(currentUser);
+            case "ADMIN" -> adminMainView.run(currentUser);
+            default -> System.out.println("Invalid username or password.");
         }
     }
 }
