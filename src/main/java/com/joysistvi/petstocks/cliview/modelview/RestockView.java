@@ -73,7 +73,7 @@ public class RestockView {
         System.out.println("0. Back");
     }
 
-    private boolean recordStockIn() {
+    public boolean recordStockIn() {
         CliViewUtility.showHeader("Record Stock In");
 
         Inventory inventory = selectInventory();

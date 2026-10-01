@@ -73,7 +73,7 @@ public class DispatchView {
         System.out.println("0. Back");
     }
 
-    private boolean recordStockOut() {
+    public boolean recordStockOut() {
         CliViewUtility.showHeader("Record Stock Out");
 
         Inventory inventory = selectInventory();
