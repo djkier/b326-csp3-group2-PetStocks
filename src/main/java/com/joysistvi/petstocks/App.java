@@ -9,6 +9,8 @@ import com.joysistvi.petstocks.cliview.modelview.ProductView;
 import com.joysistvi.petstocks.cliview.modelview.RestockView;
 import com.joysistvi.petstocks.cliview.modelview.SupplierView;
 import com.joysistvi.petstocks.cliview.modelview.UserView;
+import com.joysistvi.petstocks.cliview.publicview.AdminMainView;
+import com.joysistvi.petstocks.cliview.publicview.AdminManagementView;
 import com.joysistvi.petstocks.cliview.publicview.LoginView;
 import com.joysistvi.petstocks.cliview.publicview.MonitorView;
 import com.joysistvi.petstocks.cliview.publicview.StaffInventoryView;
@@ -126,22 +128,28 @@ public class App {
             StockMovementView stockMovementView = new StockMovementView(
                     restockController, dispatchController, scanner);
             MonitorView monitorView = new MonitorView(inventoryView, scanner);
+            AdminManagementView adminManagementView = new AdminManagementView(
+                    productView, categoryView, supplierView, petTypeView, userView, scanner);
             StaffMainView staffMainView = new StaffMainView(
                     staffInventoryView, restockView, dispatchView,
                     stockMovementView, monitorView, scanner);
+            AdminMainView adminMainView = new AdminMainView(
+                    staffInventoryView, restockView, dispatchView,
+                    stockMovementView, monitorView, adminManagementView, scanner);
             LoginView loginView = new LoginView(scanner);
 
-            runLoginMenu(loginView, staffMainView);
+            runLoginMenu(loginView, staffMainView, adminMainView);
         }
     }
 
-    private static void runLoginMenu(LoginView loginView, StaffMainView staffMainView) {
+    private static void runLoginMenu(LoginView loginView, StaffMainView staffMainView,
+                                     AdminMainView adminMainView) {
         while (true) {
             LoginView.Selection selection = loginView.promptForSelection();
 
             switch (selection) {
                 case STAFF -> staffMainView.run();
-                case ADMIN -> System.out.println("Administrator workflow selected.");
+                case ADMIN -> adminMainView.run();
                 case EXIT -> {
                     System.out.println("Exiting PetStock...");
                     return;
