@@ -104,25 +104,65 @@ public class SupplierView {
     }
 
     private void createSupplier() {
-        CliViewUtility.showHeader("Create Supplier");
-        System.out.print("Name: ");
+        Supplier supplier = promptForNewSupplier("Create Supplier", false);
+        boolean isSuccess = saveNewSupplier(supplier);
+
+        if (isSuccess) {
+            System.out.println();
+            printSuppliers(supplierController.handleViewAllSuppliers("id"));
+        }
+    }
+
+    public Supplier createSupplierForStockIn() {
+        while (true) {
+            Supplier supplier = promptForNewSupplier("Add Custom Supplier", true);
+            if (supplier == null) {
+                return null;
+            }
+            if (saveNewSupplier(supplier)) {
+                return supplier;
+            }
+            if (!promptToRetrySupplierCreation()) {
+                return null;
+            }
+        }
+    }
+
+    private Supplier promptForNewSupplier(String title, boolean allowImmediateCancel) {
+        CliViewUtility.showHeader(title);
+        System.out.print(allowImmediateCancel ? "Name (0 to cancel): " : "Name: ");
         String name = scanner.nextLine();
+        if (allowImmediateCancel && "0".equals(name.trim())) {
+            return null;
+        }
         System.out.print("Address: ");
         String address = scanner.nextLine();
         System.out.print("Contact number: ");
         String contactNumber = scanner.nextLine();
         System.out.print("Email: ");
         String email = scanner.nextLine();
+        return new Supplier(name, address, contactNumber, email);
+    }
 
-        Supplier supplier = new Supplier(name, address, contactNumber, email);
+    private boolean saveNewSupplier(Supplier supplier) {
         boolean isSuccess = supplierController.handleCreateSupplier(supplier);
         System.out.println(isSuccess
                 ? "Supplier created successfully."
                 : "Failed to create supplier.");
+        return isSuccess;
+    }
 
-        if (isSuccess) {
-            System.out.println();
-            printSuppliers(supplierController.handleViewAllSuppliers("id"));
+    private boolean promptToRetrySupplierCreation() {
+        while (true) {
+            System.out.println("[1] Retry    [0] Cancel");
+            int choice = InputUtility.readInt(scanner, "Choice: ");
+            if (choice == 1) {
+                return true;
+            }
+            if (choice == 0) {
+                return false;
+            }
+            System.out.println("Invalid menu selection.");
         }
     }
 
