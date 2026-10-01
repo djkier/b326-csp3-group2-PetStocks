@@ -48,7 +48,7 @@ public class UserView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("User Management");
+        CliViewUtility.showScreen("User Management");
         System.out.println("1. View All Users");
         System.out.println("2. Find User by ID");
         System.out.println("3. Search Users");
@@ -66,7 +66,7 @@ public class UserView {
         while (true) {
             List<User> users = userController.handleViewAllUsers(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, users.size());
-            CliViewUtility.showHeader("All Users");
+            CliViewUtility.showScreen("All Users");
             printUsers(CliViewUtility.page(users, currentPage));
             CliViewUtility.printPagination(currentPage, users.size());
             System.out.println("Sort by: [1] ID  [2] Username  [3] Role  [0] Back");
@@ -77,16 +77,19 @@ public class UserView {
                 case "1" -> { sortBy = "id"; currentPage = 0; }
                 case "2" -> { sortBy = "username"; currentPage = 0; }
                 case "3" -> { sortBy = "role"; currentPage = 0; }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, users.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, users.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private boolean findUserById() {
-        CliViewUtility.showHeader("Find User By ID");
+        CliViewUtility.showScreen("Find User By ID");
         int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -100,7 +103,7 @@ public class UserView {
     }
 
     private void searchUsers() {
-        CliViewUtility.showHeader("Search Users");
+        CliViewUtility.showScreen("Search Users");
         System.out.print("Enter username or role: ");
         String keyword = scanner.nextLine();
         CliViewUtility.browsePages(
@@ -108,7 +111,7 @@ public class UserView {
     }
 
     private boolean createUser() {
-        CliViewUtility.showHeader("Create / Register User");
+        CliViewUtility.showScreen("Create / Register User");
         System.out.print("Username (0 to cancel): ");
         String username = scanner.nextLine();
         if ("0".equals(username.trim())) {
@@ -134,7 +137,7 @@ public class UserView {
     }
 
     private boolean updateUsername() {
-        CliViewUtility.showHeader("Update Username");
+        CliViewUtility.showScreen("Update Username");
         CliViewUtility.browsePages(
                 userController.handleViewAllUsers("id"), scanner, this::printUsers);
         int id = InputUtility.readInt(scanner, "User ID to update (0 to cancel): ");
@@ -161,7 +164,7 @@ public class UserView {
     }
 
     private boolean updateRole() {
-        CliViewUtility.showHeader("Update User Role");
+        CliViewUtility.showScreen("Update User Role");
         CliViewUtility.browsePages(
                 userController.handleViewAllUsers("id"), scanner, this::printUsers);
         int id = InputUtility.readInt(scanner, "User ID to update (0 to cancel): ");
@@ -188,7 +191,7 @@ public class UserView {
     }
 
     private boolean changePassword() {
-        CliViewUtility.showHeader("Change User Password");
+        CliViewUtility.showScreen("Change User Password");
         CliViewUtility.browsePages(
                 userController.handleViewAllUsers("id"), scanner, this::printUsers);
         int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");

@@ -49,7 +49,7 @@ public class PetTypeView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Pet Type Management");
+        CliViewUtility.showScreen("Pet Type Management");
         System.out.println("1. View All Active Pet Types");
         System.out.println("2. Find Pet Type by ID");
         System.out.println("3. Search Pet Types");
@@ -66,7 +66,7 @@ public class PetTypeView {
         while (true) {
             List<PetType> petTypes = petTypeController.handleViewAllPetTypes(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, petTypes.size());
-            CliViewUtility.showHeader("Active Pet Types");
+            CliViewUtility.showScreen("Active Pet Types");
             printPetTypes(CliViewUtility.page(petTypes, currentPage));
             CliViewUtility.printPagination(currentPage, petTypes.size());
             printSortOptions();
@@ -76,16 +76,19 @@ public class PetTypeView {
             switch (choice) {
                 case "1" -> { sortBy = "id"; currentPage = 0; }
                 case "2" -> { sortBy = "name"; currentPage = 0; }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, petTypes.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, petTypes.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private boolean findPetTypeById() {
-        CliViewUtility.showHeader("Find Pet Type By ID");
+        CliViewUtility.showScreen("Find Pet Type By ID");
         int id = InputUtility.readInt(scanner, "Pet type ID (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -100,7 +103,7 @@ public class PetTypeView {
     }
 
     private void searchPetTypes() {
-        CliViewUtility.showHeader("Search Pet Types");
+        CliViewUtility.showScreen("Search Pet Types");
         System.out.print("Enter name or description: ");
         String keyword = scanner.nextLine();
         CliViewUtility.browsePages(
@@ -108,7 +111,7 @@ public class PetTypeView {
     }
 
     private void createPetType() {
-        CliViewUtility.showHeader("Create Pet Type");
+        CliViewUtility.showScreen("Create Pet Type");
         System.out.print("Name: ");
         String name = scanner.nextLine();
         System.out.print("Description (optional): ");
@@ -128,7 +131,7 @@ public class PetTypeView {
     }
 
     private boolean updatePetType() {
-        CliViewUtility.showHeader("Update Pet Type");
+        CliViewUtility.showScreen("Update Pet Type");
         CliViewUtility.browsePages(
                 petTypeController.handleViewAllPetTypes("id"), scanner, this::printPetTypes);
 
@@ -176,7 +179,7 @@ public class PetTypeView {
     }
 
     private boolean archivePetType() {
-        CliViewUtility.showHeader("Archive Pet Type");
+        CliViewUtility.showScreen("Archive Pet Type");
         CliViewUtility.browsePages(
                 petTypeController.handleViewAllPetTypes("id"), scanner, this::printPetTypes);
         int id = InputUtility.readInt(scanner, "Pet type ID to archive (0 to cancel): ");
@@ -192,7 +195,7 @@ public class PetTypeView {
     }
 
     private boolean restorePetType() {
-        CliViewUtility.showHeader("Restore Pet Type");
+        CliViewUtility.showScreen("Restore Pet Type");
         CliViewUtility.browsePages(
                 petTypeController.handleViewArchivedPetTypes("id"), scanner, this::printPetTypes);
         int id = InputUtility.readInt(scanner, "Pet type ID to restore (0 to cancel): ");
@@ -214,7 +217,7 @@ public class PetTypeView {
         while (true) {
             List<PetType> petTypes = petTypeController.handleViewArchivedPetTypes(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, petTypes.size());
-            CliViewUtility.showHeader("Archived Pet Types");
+            CliViewUtility.showScreen("Archived Pet Types");
             printPetTypes(CliViewUtility.page(petTypes, currentPage));
             CliViewUtility.printPagination(currentPage, petTypes.size());
             printSortOptions();
@@ -224,16 +227,19 @@ public class PetTypeView {
             switch (choice) {
                 case "1" -> { sortBy = "id"; currentPage = 0; }
                 case "2" -> { sortBy = "name"; currentPage = 0; }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, petTypes.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, petTypes.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private boolean deletePetType() {
-        CliViewUtility.showHeader("Delete Archived Pet Type");
+        CliViewUtility.showScreen("Delete Archived Pet Type");
         CliViewUtility.browsePages(
                 petTypeController.handleViewArchivedPetTypes("id"), scanner, this::printPetTypes);
         int id = InputUtility.readInt(scanner, "Archived pet type ID to delete permanently (0 to cancel): ");
@@ -275,7 +281,7 @@ public class PetTypeView {
     }
 
     private void printArchiveAndDeleteMenu() {
-        CliViewUtility.showHeader("Archiving / Deleting Pet Types");
+        CliViewUtility.showScreen("Archiving / Deleting Pet Types");
         System.out.println("1. Archive Pet Type");
         System.out.println("2. Restore Pet Type");
         System.out.println("3. View Archived Pet Types");

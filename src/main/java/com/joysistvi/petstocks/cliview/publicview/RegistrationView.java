@@ -20,7 +20,7 @@ public class RegistrationView {
 
     public void run() {
         while (true) {
-            CliViewUtility.showHeader("Register Staff Account");
+            CliViewUtility.showScreen("Register Staff Account");
             System.out.print("Username (0 to cancel): ");
             String username = scanner.nextLine();
             if ("0".equals(username.trim())) {

@@ -52,7 +52,7 @@ public class SupplierView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Supplier Management");
+        CliViewUtility.showScreen("Supplier Management");
         System.out.println("1. View All Active Suppliers");
         System.out.println("2. Find Supplier by ID");
         System.out.println("3. Search Suppliers");
@@ -69,7 +69,7 @@ public class SupplierView {
         while (true) {
             List<Supplier> suppliers = supplierController.handleViewAllSuppliers(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, suppliers.size());
-            CliViewUtility.showHeader("Active Suppliers");
+            CliViewUtility.showScreen("Active Suppliers");
             printSuppliers(CliViewUtility.page(suppliers, currentPage));
             CliViewUtility.printPagination(currentPage, suppliers.size());
             printSortOptions();
@@ -79,16 +79,19 @@ public class SupplierView {
             switch (choice) {
                 case "1" -> { sortBy = "id"; currentPage = 0; }
                 case "2" -> { sortBy = "name"; currentPage = 0; }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, suppliers.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, suppliers.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private boolean findSupplierById() {
-        CliViewUtility.showHeader("Find Supplier By ID");
+        CliViewUtility.showScreen("Find Supplier By ID");
         int id = InputUtility.readInt(scanner, "Supplier ID (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -103,7 +106,7 @@ public class SupplierView {
     }
 
     private void searchSuppliers() {
-        CliViewUtility.showHeader("Search Suppliers");
+        CliViewUtility.showScreen("Search Suppliers");
         System.out.print("Enter name, address, contact number, or email: ");
         String keyword = scanner.nextLine();
         CliViewUtility.browsePages(
@@ -137,7 +140,7 @@ public class SupplierView {
     }
 
     private Supplier promptForNewSupplier(String title, boolean allowImmediateCancel) {
-        CliViewUtility.showHeader(title);
+        CliViewUtility.showScreen(title);
         System.out.print(allowImmediateCancel ? "Name (0 to cancel): " : "Name: ");
         String name = scanner.nextLine();
         if (allowImmediateCancel && "0".equals(name.trim())) {
@@ -175,7 +178,7 @@ public class SupplierView {
     }
 
     private boolean updateSupplier() {
-        CliViewUtility.showHeader("Update Supplier");
+        CliViewUtility.showScreen("Update Supplier");
         CliViewUtility.browsePages(
                 supplierController.handleViewAllSuppliers("id"), scanner, this::printSuppliers);
 
@@ -226,7 +229,7 @@ public class SupplierView {
     }
 
     private boolean archiveSupplier() {
-        CliViewUtility.showHeader("Archive Supplier");
+        CliViewUtility.showScreen("Archive Supplier");
         CliViewUtility.browsePages(
                 supplierController.handleViewAllSuppliers("id"), scanner, this::printSuppliers);
         int id = InputUtility.readInt(scanner, "Supplier ID to archive (0 to cancel): ");
@@ -242,7 +245,7 @@ public class SupplierView {
     }
 
     private boolean restoreSupplier() {
-        CliViewUtility.showHeader("Restore Supplier");
+        CliViewUtility.showScreen("Restore Supplier");
         CliViewUtility.browsePages(
                 supplierController.handleViewArchivedSuppliers("id"), scanner, this::printSuppliers);
         int id = InputUtility.readInt(scanner, "Supplier ID to restore (0 to cancel): ");
@@ -264,7 +267,7 @@ public class SupplierView {
         while (true) {
             List<Supplier> suppliers = supplierController.handleViewArchivedSuppliers(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, suppliers.size());
-            CliViewUtility.showHeader("Archived Suppliers");
+            CliViewUtility.showScreen("Archived Suppliers");
             printSuppliers(CliViewUtility.page(suppliers, currentPage));
             CliViewUtility.printPagination(currentPage, suppliers.size());
             printSortOptions();
@@ -274,16 +277,19 @@ public class SupplierView {
             switch (choice) {
                 case "1" -> { sortBy = "id"; currentPage = 0; }
                 case "2" -> { sortBy = "name"; currentPage = 0; }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, suppliers.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, suppliers.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private boolean deleteSupplier() {
-        CliViewUtility.showHeader("Delete Archived Supplier");
+        CliViewUtility.showScreen("Delete Archived Supplier");
         CliViewUtility.browsePages(
                 supplierController.handleViewArchivedSuppliers("id"), scanner, this::printSuppliers);
         int id = InputUtility.readInt(scanner, "Archived supplier ID to delete permanently (0 to cancel): ");
@@ -325,7 +331,7 @@ public class SupplierView {
     }
 
     private void printArchiveAndDeleteMenu() {
-        CliViewUtility.showHeader("Archiving / Deleting Suppliers");
+        CliViewUtility.showScreen("Archiving / Deleting Suppliers");
         System.out.println("1. Archive Supplier");
         System.out.println("2. Restore Supplier");
         System.out.println("3. View Archived Suppliers");

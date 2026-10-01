@@ -54,7 +54,7 @@ public class ProductView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Product Management");
+        CliViewUtility.showScreen("Product Management");
         System.out.println("1. View All Active Products");
         System.out.println("2. Find Product by ID");
         System.out.println("3. Search Products");
@@ -71,7 +71,7 @@ public class ProductView {
         while (true) {
             List<Product> products = productController.handleViewAllProducts(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, products.size());
-            CliViewUtility.showHeader("Active Products");
+            CliViewUtility.showScreen("Active Products");
             printProducts(CliViewUtility.page(products, currentPage));
             CliViewUtility.printPagination(currentPage, products.size());
             printSortOptions();
@@ -81,16 +81,19 @@ public class ProductView {
             switch (choice) {
                 case "1" -> { sortBy = "id"; currentPage = 0; }
                 case "2" -> { sortBy = "name"; currentPage = 0; }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, products.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, products.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private boolean findProductById() {
-        CliViewUtility.showHeader("Find Product By ID");
+        CliViewUtility.showScreen("Find Product By ID");
         int id = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -104,7 +107,7 @@ public class ProductView {
     }
 
     private void searchProducts() {
-        CliViewUtility.showHeader("Search Products");
+        CliViewUtility.showScreen("Search Products");
         System.out.print("Enter product name, brand, description, or category: ");
         String keyword = scanner.nextLine();
         CliViewUtility.browsePages(
@@ -143,7 +146,7 @@ public class ProductView {
     }
 
     private Product promptForNewProduct(String title, boolean allowImmediateCancel) {
-        CliViewUtility.showHeader(title);
+        CliViewUtility.showScreen(title);
         System.out.print(allowImmediateCancel ? "Name (0 to cancel): " : "Name: ");
         String name = scanner.nextLine();
         if (allowImmediateCancel && "0".equals(name.trim())) {
@@ -183,7 +186,7 @@ public class ProductView {
     }
 
     private boolean updateProduct() {
-        CliViewUtility.showHeader("Update Product");
+        CliViewUtility.showScreen("Update Product");
         CliViewUtility.browsePages(
                 productController.handleViewAllProducts("id"), scanner, this::printProducts);
 
@@ -235,7 +238,7 @@ public class ProductView {
     }
 
     private boolean archiveProduct() {
-        CliViewUtility.showHeader("Archive Product");
+        CliViewUtility.showScreen("Archive Product");
         CliViewUtility.browsePages(
                 productController.handleViewAllProducts("id"), scanner, this::printProducts);
         int id = InputUtility.readInt(scanner, "Product ID to archive (0 to cancel): ");
@@ -251,7 +254,7 @@ public class ProductView {
     }
 
     private boolean restoreProduct() {
-        CliViewUtility.showHeader("Restore Product");
+        CliViewUtility.showScreen("Restore Product");
         CliViewUtility.browsePages(
                 productController.handleViewArchivedProducts("id"), scanner, this::printProducts);
         int id = InputUtility.readInt(scanner, "Product ID to restore (0 to cancel): ");
@@ -273,7 +276,7 @@ public class ProductView {
         while (true) {
             List<Product> products = productController.handleViewArchivedProducts(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, products.size());
-            CliViewUtility.showHeader("Archived Products");
+            CliViewUtility.showScreen("Archived Products");
             printProducts(CliViewUtility.page(products, currentPage));
             CliViewUtility.printPagination(currentPage, products.size());
             printSortOptions();
@@ -283,16 +286,19 @@ public class ProductView {
             switch (choice) {
                 case "1" -> { sortBy = "id"; currentPage = 0; }
                 case "2" -> { sortBy = "name"; currentPage = 0; }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, products.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, products.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private boolean deleteProduct() {
-        CliViewUtility.showHeader("Delete Archived Product");
+        CliViewUtility.showScreen("Delete Archived Product");
         CliViewUtility.browsePages(
                 productController.handleViewArchivedProducts("id"), scanner, this::printProducts);
         int id = InputUtility.readInt(scanner, "Archived product ID to delete permanently (0 to cancel): ");
@@ -334,7 +340,7 @@ public class ProductView {
     }
 
     private void printArchiveAndDeleteMenu() {
-        CliViewUtility.showHeader("Archiving / Deleting Products");
+        CliViewUtility.showScreen("Archiving / Deleting Products");
         System.out.println("1. Archive Product");
         System.out.println("2. Restore Product");
         System.out.println("3. View Archived Products");

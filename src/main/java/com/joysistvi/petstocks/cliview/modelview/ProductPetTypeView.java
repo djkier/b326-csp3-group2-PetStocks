@@ -50,7 +50,7 @@ public class ProductPetTypeView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Product Pet Type Management");
+        CliViewUtility.showScreen("Product Pet Type Management");
         System.out.println("1. Assign Pet Type to Product");
         System.out.println("2. Remove Pet Type from Product");
         System.out.println("3. View Pet Types Assigned to a Product");
@@ -60,7 +60,7 @@ public class ProductPetTypeView {
     }
 
     private boolean assignPetTypeToProduct() {
-        CliViewUtility.showHeader("Assign Pet Type to Product");
+        CliViewUtility.showScreen("Assign Pet Type to Product");
 
         Product product = selectActiveProduct();
         if (product == null) {
@@ -81,7 +81,7 @@ public class ProductPetTypeView {
     }
 
     private boolean removePetTypeFromProduct() {
-        CliViewUtility.showHeader("Remove Pet Type from Product");
+        CliViewUtility.showScreen("Remove Pet Type from Product");
         int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
@@ -110,7 +110,7 @@ public class ProductPetTypeView {
     }
 
     private boolean viewPetTypesByProduct() {
-        CliViewUtility.showHeader("Pet Types Assigned to Product");
+        CliViewUtility.showScreen("Pet Types Assigned to Product");
         int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
@@ -124,7 +124,7 @@ public class ProductPetTypeView {
     }
 
     private boolean viewProductsByPetType() {
-        CliViewUtility.showHeader("Products Assigned to Pet Type");
+        CliViewUtility.showScreen("Products Assigned to Pet Type");
         int petTypeId = InputUtility.readInt(scanner, "Pet type ID (0 to cancel): ");
         if (petTypeId == 0) {
             return false;
@@ -138,7 +138,7 @@ public class ProductPetTypeView {
     }
 
     private boolean checkRelationship() {
-        CliViewUtility.showHeader("Check Product-Pet Type Relationship");
+        CliViewUtility.showScreen("Check Product-Pet Type Relationship");
         int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;

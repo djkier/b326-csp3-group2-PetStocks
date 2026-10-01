@@ -5,6 +5,7 @@ import com.joysistvi.petstocks.controller.RestockController;
 import com.joysistvi.petstocks.model.Dispatch;
 import com.joysistvi.petstocks.model.Restock;
 import com.joysistvi.petstocks.utility.CliViewUtility;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -56,13 +57,16 @@ public class StockMovementView {
                     filter = MovementFilter.STOCK_OUT;
                     currentPage = 0;
                 }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
                 case "N" -> currentPage = CliViewUtility.nextPage(
-                        currentPage, filteredMovements.size());
+                        currentPage, filteredMovements.size(), scanner);
                 case "0" -> {
                     return;
                 }
-                default -> System.out.println("Invalid selection.");
+                default -> {
+                    System.out.println("Invalid selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
@@ -109,7 +113,7 @@ public class StockMovementView {
 
     private void printPage(List<StockMovement> movements, MovementFilter filter,
                            int currentPage) {
-        CliViewUtility.showHeader("Stock Movement History");
+        CliViewUtility.showScreen("Stock Movement History");
         System.out.println("Filter: " + filter.displayName());
         System.out.println();
 

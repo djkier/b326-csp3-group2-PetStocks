@@ -35,7 +35,7 @@ public class MonitorView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Monitor Inventory");
+        CliViewUtility.showScreen("Monitor Inventory");
         System.out.println("1. View Low-Stock Products");
         System.out.println("2. View Soon-Expiring Products");
         System.out.println("0. Back");

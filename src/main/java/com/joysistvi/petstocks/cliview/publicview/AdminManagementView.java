@@ -55,7 +55,7 @@ public class AdminManagementView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Admin Management");
+        CliViewUtility.showScreen("Admin Management");
         System.out.println("1. Manage Products");
         System.out.println("2. Manage Categories");
         System.out.println("3. Manage Suppliers");

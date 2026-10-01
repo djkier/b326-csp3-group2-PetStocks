@@ -66,7 +66,7 @@ public class StaffMainView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Staff Menu");
+        CliViewUtility.showScreen("Staff Menu");
         printOperationalOptions();
         System.out.println("0. Logout");
     }

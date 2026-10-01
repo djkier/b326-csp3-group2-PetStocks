@@ -65,7 +65,7 @@ public class DispatchView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Dispatch / Stock-Out Management");
+        CliViewUtility.showScreen("Dispatch / Stock-Out Management");
         System.out.println("1. Record Stock Out");
         System.out.println("2. View Dispatch History");
         System.out.println("3. Find Dispatch by ID");
@@ -89,7 +89,7 @@ public class DispatchView {
     }
 
     private boolean recordStockOut(User currentUser, boolean promptForUser) {
-        CliViewUtility.showHeader("Record Stock Out");
+        CliViewUtility.showScreen("Record Stock Out");
 
         Inventory inventory = selectInventory();
         if (inventory == null) {
@@ -112,7 +112,7 @@ public class DispatchView {
             return false;
         }
 
-        CliViewUtility.showHeader("Dispatch Date and Time");
+        CliViewUtility.showScreen("Dispatch Date and Time");
         LocalDateTime datetimeDispatched = InputUtility.readDateTimeSelection(scanner);
         if (datetimeDispatched == null) {
             return false;
@@ -146,7 +146,7 @@ public class DispatchView {
         while (true) {
             List<Dispatch> dispatches = dispatchController.handleViewDispatchHistory(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, dispatches.size());
-            CliViewUtility.showHeader("Dispatch History");
+            CliViewUtility.showScreen("Dispatch History");
             printDispatches(CliViewUtility.page(dispatches, currentPage));
             CliViewUtility.printPagination(currentPage, dispatches.size());
             System.out.println("Sort by: [1] Date  [2] ID  [3] Product  [4] User  [0] Back");
@@ -158,16 +158,19 @@ public class DispatchView {
                 case "2" -> { sortBy = "id"; currentPage = 0; }
                 case "3" -> { sortBy = "product"; currentPage = 0; }
                 case "4" -> { sortBy = "user"; currentPage = 0; }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, dispatches.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, dispatches.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private boolean findDispatchById() {
-        CliViewUtility.showHeader("Find Dispatch By ID");
+        CliViewUtility.showScreen("Find Dispatch By ID");
         int id = InputUtility.readInt(scanner, "Dispatch ID (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -181,7 +184,7 @@ public class DispatchView {
     }
 
     private boolean viewDispatchesByInventory() {
-        CliViewUtility.showHeader("Dispatches By Inventory");
+        CliViewUtility.showScreen("Dispatches By Inventory");
         CliViewUtility.browsePages(
                 inventoryController.handleViewAllInventory("id"),
                 scanner, this::printInventoryChoices);
@@ -197,7 +200,7 @@ public class DispatchView {
     }
 
     private boolean viewDispatchesByProduct() {
-        CliViewUtility.showHeader("Dispatches By Product");
+        CliViewUtility.showScreen("Dispatches By Product");
         List<Product> products = new ArrayList<>(productController.handleViewAllProducts("id"));
         products.addAll(productController.handleViewArchivedProducts("id"));
         CliViewUtility.browsePages(products, scanner, this::printProductChoices);
@@ -214,7 +217,7 @@ public class DispatchView {
     }
 
     private boolean viewDispatchesByUser() {
-        CliViewUtility.showHeader("Dispatches By User");
+        CliViewUtility.showScreen("Dispatches By User");
         Map<Integer, String> users = dispatchController.handleGetAvailableUsers();
         CliViewUtility.browsePages(
                 new ArrayList<>(users.entrySet()), scanner, this::printUserChoices);
@@ -230,7 +233,7 @@ public class DispatchView {
     }
 
     private boolean viewDispatchesByDateRange() {
-        CliViewUtility.showHeader("Dispatches By Date / Date Range");
+        CliViewUtility.showScreen("Dispatches By Date / Date Range");
         LocalDate startDate = InputUtility.readDate(
                 scanner, "Start date (YYYY-MM-DD, 0 to cancel): ");
         if (startDate == null) {
@@ -269,6 +272,7 @@ public class DispatchView {
 
         int currentPage = 0;
         while (true) {
+            CliViewUtility.showScreen("Record Stock Out");
             currentPage = CliViewUtility.normalizePage(currentPage, inventory.size());
             inventoryView.printStockMovementInventory(
                     CliViewUtility.page(inventory, currentPage));
@@ -278,11 +282,11 @@ public class DispatchView {
             String input = scanner.nextLine().trim().toUpperCase();
 
             if ("P".equals(input)) {
-                currentPage = CliViewUtility.previousPage(currentPage);
+                currentPage = CliViewUtility.previousPage(currentPage, scanner);
                 continue;
             }
             if ("N".equals(input)) {
-                currentPage = CliViewUtility.nextPage(currentPage, inventory.size());
+                currentPage = CliViewUtility.nextPage(currentPage, inventory.size(), scanner);
                 continue;
             }
             if ("0".equals(input)) {
@@ -297,8 +301,10 @@ public class DispatchView {
                     }
                 }
                 System.out.println("Choose an ID from the inventory list.");
+                InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
             } catch (NumberFormatException e) {
                 System.out.println("Enter an Inventory ID, P, N, or 0.");
+                InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
             }
         }
     }
