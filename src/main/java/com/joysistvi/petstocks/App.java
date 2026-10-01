@@ -109,7 +109,7 @@ public class App {
                     inventoryController, productController, scanner);
             RestockView restockView = new RestockView(
                     restockController, inventoryController, supplierController,
-                    productView, inventoryView, scanner);
+                    productView, inventoryView, supplierView, scanner);
             DispatchView dispatchView = new DispatchView(
                     dispatchController, inventoryController, productController, scanner);
             UserView userView = new UserView(userController, scanner);
