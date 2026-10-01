@@ -250,7 +250,7 @@ public class DispatchView {
             return null;
         }
 
-        inventoryView.printInventory(inventory);
+        inventoryView.printStockMovementInventory(inventory);
         while (true) {
             int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
             if (id == 0) {

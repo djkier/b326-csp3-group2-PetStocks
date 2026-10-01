@@ -158,7 +158,7 @@ public class RestockView {
     private Inventory selectStockInInventory() {
         List<Inventory> inventory = inventoryController.handleViewAllInventory();
         System.out.println();
-        inventoryView.printInventory(inventory);
+        inventoryView.printStockMovementInventory(inventory);
 
         while (true) {
             System.out.println();
