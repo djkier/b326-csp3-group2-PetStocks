@@ -9,24 +9,25 @@ import java.util.Scanner;
 
 public class StaffMainView {
     private static final int HEADER_WIDTH = 40;
-    private static final String UPCOMING_FEATURE_MESSAGE =
-            "This feature will be added in the next workflow task.";
 
     private final StaffInventoryView staffInventoryView;
     private final RestockView restockView;
     private final DispatchView dispatchView;
     private final StockMovementView stockMovementView;
+    private final MonitorView monitorView;
     private final Scanner scanner;
 
     public StaffMainView(StaffInventoryView staffInventoryView,
                          RestockView restockView,
                          DispatchView dispatchView,
                          StockMovementView stockMovementView,
+                         MonitorView monitorView,
                          Scanner scanner) {
         this.staffInventoryView = staffInventoryView;
         this.restockView = restockView;
         this.dispatchView = dispatchView;
         this.stockMovementView = stockMovementView;
+        this.monitorView = monitorView;
         this.scanner = scanner;
     }
 
@@ -42,7 +43,7 @@ public class StaffMainView {
                 case 2 -> CliViewUtility.pauseAfter(scanner, restockView.recordStockIn());
                 case 3 -> CliViewUtility.pauseAfter(scanner, dispatchView.recordStockOut());
                 case 4 -> stockMovementView.run();
-                case 5 -> showUpcomingFeatureMessage();
+                case 5 -> monitorView.run();
                 case 0 -> System.out.println("Logging out...");
                 default -> {
                     System.out.println("Invalid menu selection.");
@@ -63,10 +64,5 @@ public class StaffMainView {
         System.out.println("4. Stock Movement History");
         System.out.println("5. Monitor Inventory");
         System.out.println("0. Logout");
-    }
-
-    private void showUpcomingFeatureMessage() {
-        System.out.println(UPCOMING_FEATURE_MESSAGE);
-        InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
     }
 }
