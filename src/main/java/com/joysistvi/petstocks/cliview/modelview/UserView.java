@@ -61,23 +61,28 @@ public class UserView {
 
     private void viewAllUsers() {
         String sortBy = "id";
-        int choice;
+        int currentPage = 0;
 
-        do {
+        while (true) {
+            List<User> users = userController.handleViewAllUsers(sortBy);
+            currentPage = CliViewUtility.normalizePage(currentPage, users.size());
             CliViewUtility.showHeader("All Users");
-            printUsers(userController.handleViewAllUsers(sortBy));
-            System.out.println();
+            printUsers(CliViewUtility.page(users, currentPage));
+            CliViewUtility.printPagination(currentPage, users.size());
             System.out.println("Sort by: [1] ID  [2] Username  [3] Role  [0] Back");
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1 -> sortBy = "id";
-                case 2 -> sortBy = "username";
-                case 3 -> sortBy = "role";
-                case 0 -> { }
+                case "1" -> { sortBy = "id"; currentPage = 0; }
+                case "2" -> { sortBy = "username"; currentPage = 0; }
+                case "3" -> { sortBy = "role"; currentPage = 0; }
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, users.size());
+                case "0" -> { return; }
                 default -> System.out.println("Invalid sort selection.");
             }
-        } while (choice != 0);
+        }
     }
 
     private boolean findUserById() {
@@ -89,7 +94,7 @@ public class UserView {
 
         User user = userController.handleFindUserById(id);
         if (user != null) {
-            printUsers(List.of(user));
+            CliViewUtility.browsePages(List.of(user), scanner, this::printUsers);
         }
         return true;
     }
@@ -98,7 +103,8 @@ public class UserView {
         CliViewUtility.showHeader("Search Users");
         System.out.print("Enter username or role: ");
         String keyword = scanner.nextLine();
-        printUsers(userController.searchUsers(keyword));
+        CliViewUtility.browsePages(
+                userController.searchUsers(keyword), scanner, this::printUsers);
     }
 
     private boolean createUser() {
@@ -129,7 +135,8 @@ public class UserView {
 
     private boolean updateUsername() {
         CliViewUtility.showHeader("Update Username");
-        printUsers(userController.handleViewAllUsers("id"));
+        CliViewUtility.browsePages(
+                userController.handleViewAllUsers("id"), scanner, this::printUsers);
         int id = InputUtility.readInt(scanner, "User ID to update (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -155,7 +162,8 @@ public class UserView {
 
     private boolean updateRole() {
         CliViewUtility.showHeader("Update User Role");
-        printUsers(userController.handleViewAllUsers("id"));
+        CliViewUtility.browsePages(
+                userController.handleViewAllUsers("id"), scanner, this::printUsers);
         int id = InputUtility.readInt(scanner, "User ID to update (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -181,7 +189,8 @@ public class UserView {
 
     private boolean changePassword() {
         CliViewUtility.showHeader("Change User Password");
-        printUsers(userController.handleViewAllUsers("id"));
+        CliViewUtility.browsePages(
+                userController.handleViewAllUsers("id"), scanner, this::printUsers);
         int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -240,11 +249,6 @@ public class UserView {
     }
 
     public void printUsers(List<User> users) {
-        if (users.isEmpty()) {
-            System.out.println("No users found.");
-            return;
-        }
-
         String border = "+" + "-".repeat(6)
                 + "+" + "-".repeat(USERNAME_DISPLAY_WIDTH + 2)
                 + "+" + "-".repeat(ROLE_DISPLAY_WIDTH + 2) + "+";
@@ -254,6 +258,11 @@ public class UserView {
         System.out.println(border);
         System.out.printf(rowFormat, "ID", "Username", "Role");
         System.out.println(border);
+        if (users.isEmpty()) {
+            System.out.println("No users found.");
+            System.out.println(border);
+            return;
+        }
         for (User user : users) {
             System.out.printf(rowFormat,
                     user.getId(),

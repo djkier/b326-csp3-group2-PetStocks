@@ -61,21 +61,27 @@ public class CategoryView {
 
     private void viewAllCategories() {
         String sortBy = "id";
-        int choice;
+        int currentPage = 0;
 
-        do {
+        while (true) {
+            List<Category> categories = categoryController.handleViewAllCategories(sortBy);
+            currentPage = CliViewUtility.normalizePage(currentPage, categories.size());
             CliViewUtility.showHeader("Active Categories");
-            printCategories(categoryController.handleViewAllCategories(sortBy));
+            printCategories(CliViewUtility.page(categories, currentPage));
+            CliViewUtility.printPagination(currentPage, categories.size());
             printSortOptions();
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1 -> sortBy = "id";
-                case 2 -> sortBy = "name";
-                case 0 -> { }
+                case "1" -> { sortBy = "id"; currentPage = 0; }
+                case "2" -> { sortBy = "name"; currentPage = 0; }
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, categories.size());
+                case "0" -> { return; }
                 default -> System.out.println("Invalid sort selection.");
             }
-        } while (choice != 0);
+        }
     }
 
     private boolean findCategoryById() {
@@ -88,7 +94,7 @@ public class CategoryView {
         Category category = categoryController.handleGetCategoryById(id);
 
         if (category != null) {
-            printCategories(List.of(category));
+            CliViewUtility.browsePages(List.of(category), scanner, this::printCategories);
         }
         return true;
     }
@@ -97,7 +103,8 @@ public class CategoryView {
         CliViewUtility.showHeader("Search Categories");
         System.out.print("Enter name or description: ");
         String keyword = scanner.nextLine();
-        printCategories(categoryController.searchCategories(keyword));
+        CliViewUtility.browsePages(
+                categoryController.searchCategories(keyword), scanner, this::printCategories);
     }
 
     private void createCategory() {
@@ -115,13 +122,15 @@ public class CategoryView {
 
         if (isSuccess) {
             System.out.println();
-            printCategories(categoryController.handleViewAllCategories("id"));
+            CliViewUtility.browsePages(
+                    categoryController.handleViewAllCategories("id"), scanner, this::printCategories);
         }
     }
 
     private boolean updateCategory() {
         CliViewUtility.showHeader("Update Category");
-        printCategories(categoryController.handleViewAllCategories("id"));
+        CliViewUtility.browsePages(
+                categoryController.handleViewAllCategories("id"), scanner, this::printCategories);
 
         int id = InputUtility.readInt(scanner, "Category ID to update (0 to cancel): ");
         if (id == 0) {
@@ -160,14 +169,16 @@ public class CategoryView {
 
         if (isSuccess) {
             System.out.println();
-            printCategories(categoryController.handleViewAllCategories("id"));
+            CliViewUtility.browsePages(
+                    categoryController.handleViewAllCategories("id"), scanner, this::printCategories);
         }
         return true;
     }
 
     private boolean archiveCategory() {
         CliViewUtility.showHeader("Archive Category");
-        printCategories(categoryController.handleViewAllCategories("id"));
+        CliViewUtility.browsePages(
+                categoryController.handleViewAllCategories("id"), scanner, this::printCategories);
         int id = InputUtility.readInt(scanner, "Category ID to archive (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -182,7 +193,8 @@ public class CategoryView {
 
     private boolean restoreCategory() {
         CliViewUtility.showHeader("Restore Category");
-        printCategories(categoryController.handleViewArchivedCategories("id"));
+        CliViewUtility.browsePages(
+                categoryController.handleViewArchivedCategories("id"), scanner, this::printCategories);
         int id = InputUtility.readInt(scanner, "Category ID to restore (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -197,26 +209,33 @@ public class CategoryView {
 
     private void viewAllArchivedCategories() {
         String sortBy = "id";
-        int choice;
+        int currentPage = 0;
 
-        do {
+        while (true) {
+            List<Category> categories = categoryController.handleViewArchivedCategories(sortBy);
+            currentPage = CliViewUtility.normalizePage(currentPage, categories.size());
             CliViewUtility.showHeader("Archived Categories");
-            printCategories(categoryController.handleViewArchivedCategories(sortBy));
+            printCategories(CliViewUtility.page(categories, currentPage));
+            CliViewUtility.printPagination(currentPage, categories.size());
             printSortOptions();
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1 -> sortBy = "id";
-                case 2 -> sortBy = "name";
-                case 0 -> { }
+                case "1" -> { sortBy = "id"; currentPage = 0; }
+                case "2" -> { sortBy = "name"; currentPage = 0; }
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, categories.size());
+                case "0" -> { return; }
                 default -> System.out.println("Invalid sort selection.");
             }
-        } while (choice != 0);
+        }
     }
 
     private boolean deleteCategory() {
         CliViewUtility.showHeader("Delete Archived Category");
-        printCategories(categoryController.handleViewArchivedCategories("id"));
+        CliViewUtility.browsePages(
+                categoryController.handleViewArchivedCategories("id"), scanner, this::printCategories);
         int id = InputUtility.readInt(scanner, "Archived category ID to delete permanently (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -270,11 +289,6 @@ public class CategoryView {
     }
 
     public void printCategories(List<Category> categories) {
-        if (categories.isEmpty()) {
-            System.out.println("No categories found.");
-            return;
-        }
-
         String border = "+" + "-".repeat(6) + "+" + "-".repeat(27)
                 + "+" + "-".repeat(DESCRIPTION_DISPLAY_WIDTH + 2) + "+" + "-".repeat(12) + "+";
 
@@ -282,6 +296,12 @@ public class CategoryView {
         System.out.printf("| %-4s | %-25s | %-50s | %-10s |%n",
                 "ID", "Name", "Description", "Status");
         System.out.println(border);
+
+        if (categories.isEmpty()) {
+            System.out.println("No categories found.");
+            System.out.println(border);
+            return;
+        }
 
         for (Category category : categories) {
             String description = category.getDescription() == null
