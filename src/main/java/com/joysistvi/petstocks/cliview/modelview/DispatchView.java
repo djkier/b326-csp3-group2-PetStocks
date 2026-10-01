@@ -121,20 +121,24 @@ public class DispatchView {
         Dispatch dispatch = new Dispatch(
                 inventory, datetimeDispatched, quantityDispatched, userId);
         boolean isSuccess = dispatchController.handleRecordStockOut(dispatch);
-        System.out.println(isSuccess
-                ? "Stock-out recorded and inventory quantity decreased successfully."
-                : "Failed to record stock-out. No changes were committed.");
+        if (!isSuccess) {
+            System.out.println("Failed to record stock-out. No changes were committed.");
+            return true;
+        }
 
-        if (isSuccess) {
-            if (!promptForUser) {
-                System.out.println("Recorded by: " + currentUser.getUsername());
-            }
-            Dispatch recorded = dispatchController.handleFindDispatchById(dispatch.getId());
-            if (recorded != null) {
-                System.out.println();
-                CliViewUtility.browsePages(
-                        List.of(recorded), scanner, this::printDispatches);
-            }
+        Inventory updatedInventory = inventoryController.handleGetInventoryById(inventory.getId());
+        CliViewUtility.showScreen("Stock Out Recorded");
+        System.out.println("Stock-out recorded and inventory quantity decreased successfully.");
+        if (!promptForUser) {
+            System.out.println();
+            System.out.println("Recorded by: " + currentUser.getUsername());
+        }
+        if (updatedInventory != null) {
+            System.out.println();
+            inventoryView.printStockResult(updatedInventory, quantityDispatched, "Subtracted");
+        } else {
+            System.out.println();
+            System.out.println("The updated inventory details could not be loaded.");
         }
         return true;
     }

@@ -143,19 +143,19 @@ public class RestockView {
             return true;
         }
 
-        Restock recorded = restockController.handleFindRestockById(restock.getId());
+        Inventory updatedInventory = inventoryController.handleGetInventoryById(inventory.getId());
         CliViewUtility.showScreen("Stock In Recorded");
         System.out.println("Stock-in recorded and inventory quantity increased successfully.");
         if (!promptForUser) {
             System.out.println();
             System.out.println("Recorded by: " + currentUser.getUsername());
         }
-        if (recorded != null) {
+        if (updatedInventory != null) {
             System.out.println();
-            printRestocks(List.of(recorded));
+            inventoryView.printStockResult(updatedInventory, quantityDelivered, "Added");
         } else {
             System.out.println();
-            System.out.println("The recorded stock-in details could not be loaded.");
+            System.out.println("The updated inventory details could not be loaded.");
         }
         return true;
     }
