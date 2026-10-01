@@ -1,7 +1,6 @@
-package com.joysistvi.petstocks.migration;
+package com.joysistvi.petstocks.utility;
 
 import com.joysistvi.petstocks.config.DBConnection;
-import com.joysistvi.petstocks.utility.PasswordUtility;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
