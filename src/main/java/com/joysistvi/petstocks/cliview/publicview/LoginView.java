@@ -2,13 +2,12 @@ package com.joysistvi.petstocks.cliview.publicview;
 
 import com.joysistvi.petstocks.controller.UserController;
 import com.joysistvi.petstocks.model.User;
+import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.Scanner;
 
 public class LoginView {
-    private static final int HEADER_WIDTH = 40;
-
     private final UserController userController;
     private final Scanner scanner;
 
@@ -47,10 +46,7 @@ public class LoginView {
     }
 
     private void printMenu() {
-        System.out.println();
-        System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("Login");
-        System.out.println("=".repeat(HEADER_WIDTH));
+        CliViewUtility.showHeader("Login");
         System.out.println("Enter 0 as the username to go back.");
     }
 }

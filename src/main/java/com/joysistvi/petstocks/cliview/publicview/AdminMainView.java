@@ -1,13 +1,12 @@
 package com.joysistvi.petstocks.cliview.publicview;
 
 import com.joysistvi.petstocks.model.User;
+import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.Scanner;
 
 public class AdminMainView {
-    private static final int HEADER_WIDTH = 40;
-
     private final StaffMainView staffMainView;
     private final AdminManagementView adminManagementView;
     private final Scanner scanner;
@@ -39,10 +38,7 @@ public class AdminMainView {
     }
 
     private void printMenu() {
-        System.out.println();
-        System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("Administrator Menu");
-        System.out.println("=".repeat(HEADER_WIDTH));
+        CliViewUtility.showHeader("Administrator Menu");
         staffMainView.printOperationalOptions();
         System.out.println("5. Admin Management");
         System.out.println("0. Logout");

@@ -1,12 +1,11 @@
 package com.joysistvi.petstocks.cliview.publicview;
 
+import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.Scanner;
 
 public class LandingView {
-    private static final int HEADER_WIDTH = 40;
-
     private final Scanner scanner;
 
     public LandingView(Scanner scanner) {
@@ -32,10 +31,7 @@ public class LandingView {
     }
 
     private void printMenu() {
-        System.out.println();
-        System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("PetStock");
-        System.out.println("=".repeat(HEADER_WIDTH));
+        CliViewUtility.showHeader("PetStock");
         System.out.println("1. Login");
         System.out.println("2. Register");
         System.out.println("0. Exit");

@@ -9,8 +9,6 @@ import com.joysistvi.petstocks.utility.InputUtility;
 import java.util.Scanner;
 
 public class StaffMainView {
-    private static final int HEADER_WIDTH = 40;
-
     private final StaffInventoryView staffInventoryView;
     private final RestockView restockView;
     private final DispatchView dispatchView;
@@ -68,10 +66,7 @@ public class StaffMainView {
     }
 
     private void printMenu() {
-        System.out.println();
-        System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("Staff Menu");
-        System.out.println("=".repeat(HEADER_WIDTH));
+        CliViewUtility.showHeader("Staff Menu");
         printOperationalOptions();
         System.out.println("0. Logout");
     }
