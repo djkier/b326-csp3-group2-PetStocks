@@ -471,6 +471,25 @@ ALTER TABLE `restocks`
   ADD CONSTRAINT `fk_restocks_inventories` FOREIGN KEY (`inventory_id`) REFERENCES `inventories` (`id`),
   ADD CONSTRAINT `fk_restocks_suppliers` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`),
   ADD CONSTRAINT `fk_restocks_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Nullable optional fields (also apply these statements to existing databases)
+--
+ALTER TABLE `categories`
+  MODIFY COLUMN `description` varchar(250) NULL;
+
+ALTER TABLE `inventories`
+  MODIFY COLUMN `expiration` date NULL,
+  MODIFY COLUMN `remark` varchar(250) NULL;
+
+ALTER TABLE `pet_types`
+  MODIFY COLUMN `description` varchar(250) NULL;
+
+ALTER TABLE `products`
+  MODIFY COLUMN `description` varchar(250) NULL;
+
+ALTER TABLE `suppliers`
+  MODIFY COLUMN `email` varchar(50) NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
