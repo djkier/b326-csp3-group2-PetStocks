@@ -65,6 +65,31 @@ public class UserRepoImpl implements UserRepo {
     }
 
     @Override
+    public User getUserByUsername(String username) {
+        String query = "SELECT id, username, password_hash, role FROM users WHERE username = ?";
+
+        try (Connection conn = dbConnection.getConnection();
+             PreparedStatement prep = conn.prepareStatement(query)) {
+
+            prep.setString(1, username);
+            try (ResultSet result = prep.executeQuery()) {
+                if (result.next()) {
+                    return new User(
+                            result.getInt("id"),
+                            result.getString("username"),
+                            result.getString("password_hash"),
+                            result.getString("role")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Find User By Username Error: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    @Override
     public List<User> searchUsers(String keyword) {
         List<User> users = new ArrayList<>();
         String query = USER_SELECT +

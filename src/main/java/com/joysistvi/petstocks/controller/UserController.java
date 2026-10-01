@@ -24,6 +24,10 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    public User handleAuthenticate(String username, String plainPassword) {
+        return userService.authenticate(username, plainPassword);
+    }
+
     public List<User> searchUsers(String keyword) {
         return userService.searchUsers(keyword);
     }

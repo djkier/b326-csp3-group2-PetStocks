@@ -24,6 +24,7 @@ import com.joysistvi.petstocks.controller.ProductController;
 import com.joysistvi.petstocks.controller.RestockController;
 import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.controller.UserController;
+import com.joysistvi.petstocks.model.User;
 import com.joysistvi.petstocks.repository.CategoryRepo;
 import com.joysistvi.petstocks.repository.CategoryRepoImpl;
 import com.joysistvi.petstocks.repository.DispatchRepo;
@@ -122,7 +123,7 @@ public class App {
             AdminMainView adminMainView = new AdminMainView(
                     staffInventoryView, restockView, dispatchView,
                     stockMovementView, monitorView, adminManagementView, scanner);
-            LoginView loginView = new LoginView(scanner);
+            LoginView loginView = new LoginView(userController, scanner);
 
             runLoginMenu(loginView, staffMainView, adminMainView);
         }
@@ -131,16 +132,19 @@ public class App {
     private static void runLoginMenu(LoginView loginView, StaffMainView staffMainView,
                                      AdminMainView adminMainView) {
         while (true) {
-            LoginView.Selection selection = loginView.promptForSelection();
-
-            switch (selection) {
-                case STAFF -> staffMainView.run();
-                case ADMIN -> adminMainView.run();
-                case EXIT -> {
-                    System.out.println("Exiting PetStock...");
-                    return;
-                }
+            User currentUser = loginView.promptForLogin();
+            if (currentUser == null) {
+                System.out.println("Exiting PetStock...");
+                return;
             }
+
+            switch (currentUser.getRole()) {
+                case "STAFF" -> staffMainView.run();
+                case "ADMIN" -> adminMainView.run();
+                default -> System.out.println("Invalid username or password.");
+            }
+
+            currentUser = null;
         }
     }
 }

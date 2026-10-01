@@ -45,6 +45,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User authenticate(String username, String plainPassword) {
+        String normalizedUsername = normalizeUsername(username);
+        if (normalizedUsername == null || normalizedUsername.isEmpty()
+                || normalizedUsername.length() > MAX_USERNAME_LENGTH
+                || plainPassword == null) {
+            return null;
+        }
+
+        User user = userRepo.getUserByUsername(normalizedUsername);
+        if (user == null
+                || !PasswordUtility.verifyPassword(plainPassword, user.getPasswordHash())) {
+            return null;
+        }
+
+        String role = user.getRole() == null
+                ? "" : user.getRole().trim().toUpperCase(Locale.ROOT);
+        if (!VALID_ROLES.contains(role)) {
+            return null;
+        }
+
+        user.setRole(role);
+        user.setPasswordHash(null);
+        return user;
+    }
+
+    @Override
     public List<User> searchUsers(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             System.out.println("Search keyword cannot be empty.");
