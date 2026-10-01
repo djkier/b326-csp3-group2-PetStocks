@@ -6,6 +6,7 @@ import com.joysistvi.petstocks.controller.SupplierController;
 import com.joysistvi.petstocks.model.Inventory;
 import com.joysistvi.petstocks.model.Restock;
 import com.joysistvi.petstocks.model.Supplier;
+import com.joysistvi.petstocks.model.User;
 import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
@@ -74,6 +75,18 @@ public class RestockView {
     }
 
     public boolean recordStockIn() {
+        return recordStockIn(null, true);
+    }
+
+    public boolean recordStockIn(User currentUser) {
+        if (currentUser == null || currentUser.getId() <= 0) {
+            System.out.println("A valid logged-in user is required to record stock in.");
+            return false;
+        }
+        return recordStockIn(currentUser, false);
+    }
+
+    private boolean recordStockIn(User currentUser, boolean promptForUser) {
         CliViewUtility.showHeader("Record Stock In");
 
         Inventory inventory = selectInventory();
@@ -86,9 +99,15 @@ public class RestockView {
             return false;
         }
 
-        Integer userId = selectUser();
-        if (userId == null) {
-            return false;
+        int userId;
+        if (promptForUser) {
+            Integer selectedUserId = selectUser();
+            if (selectedUserId == null) {
+                return false;
+            }
+            userId = selectedUserId;
+        } else {
+            userId = currentUser.getId();
         }
 
         int quantityDelivered = InputUtility.readInt(scanner, "Quantity delivered (0 to cancel): ");
@@ -113,6 +132,9 @@ public class RestockView {
                 : "Failed to record stock-in. No changes were committed.");
 
         if (isSuccess) {
+            if (!promptForUser) {
+                System.out.println("Recorded by: " + currentUser.getUsername());
+            }
             Restock recorded = restockController.handleFindRestockById(restock.getId());
             if (recorded != null) {
                 System.out.println();

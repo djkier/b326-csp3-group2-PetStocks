@@ -2,6 +2,7 @@ package com.joysistvi.petstocks.cliview.publicview;
 
 import com.joysistvi.petstocks.cliview.modelview.DispatchView;
 import com.joysistvi.petstocks.cliview.modelview.RestockView;
+import com.joysistvi.petstocks.model.User;
 import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
@@ -31,7 +32,7 @@ public class StaffMainView {
         this.scanner = scanner;
     }
 
-    public void run() {
+    public void run(User currentUser) {
         int choice;
 
         do {
@@ -40,8 +41,10 @@ public class StaffMainView {
 
             switch (choice) {
                 case 1 -> staffInventoryView.run();
-                case 2 -> CliViewUtility.pauseAfter(scanner, restockView.recordStockIn());
-                case 3 -> CliViewUtility.pauseAfter(scanner, dispatchView.recordStockOut());
+                case 2 -> CliViewUtility.pauseAfter(
+                        scanner, restockView.recordStockIn(currentUser));
+                case 3 -> CliViewUtility.pauseAfter(
+                        scanner, dispatchView.recordStockOut(currentUser));
                 case 4 -> stockMovementView.run();
                 case 5 -> monitorView.run();
                 case 0 -> System.out.println("Logging out...");
