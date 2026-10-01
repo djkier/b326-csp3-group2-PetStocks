@@ -237,7 +237,7 @@ public class RestockView {
 
     private boolean viewRestocksByInventory() {
         CliViewUtility.showHeader("Restocks By Inventory");
-        printInventoryChoices(inventoryController.handleViewAllInventory("id"));
+//        printInventoryChoices(inventoryController.handleViewAllInventory("id"));
         int inventoryId = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (inventoryId == 0) {
             return false;
@@ -252,7 +252,7 @@ public class RestockView {
         List<Supplier> suppliers = new ArrayList<>(
                 supplierController.handleViewAllSuppliers("id"));
         suppliers.addAll(supplierController.handleViewArchivedSuppliers("id"));
-        printSupplierChoices(suppliers);
+//        printSupplierChoices(suppliers);
 
         int supplierId = InputUtility.readInt(scanner, "Supplier ID (0 to cancel): ");
         if (supplierId == 0) {
