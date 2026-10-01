@@ -5,13 +5,12 @@ import com.joysistvi.petstocks.cliview.modelview.PetTypeView;
 import com.joysistvi.petstocks.cliview.modelview.ProductView;
 import com.joysistvi.petstocks.cliview.modelview.SupplierView;
 import com.joysistvi.petstocks.cliview.modelview.UserView;
+import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.Scanner;
 
 public class AdminManagementView {
-    private static final int HEADER_WIDTH = 40;
-
     private final ProductView productView;
     private final CategoryView categoryView;
     private final SupplierView supplierView;
@@ -56,10 +55,7 @@ public class AdminManagementView {
     }
 
     private void printMenu() {
-        System.out.println();
-        System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("Admin Management");
-        System.out.println("=".repeat(HEADER_WIDTH));
+        CliViewUtility.showHeader("Admin Management");
         System.out.println("1. Manage Products");
         System.out.println("2. Manage Categories");
         System.out.println("3. Manage Suppliers");

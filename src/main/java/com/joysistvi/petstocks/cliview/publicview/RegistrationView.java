@@ -2,12 +2,12 @@ package com.joysistvi.petstocks.cliview.publicview;
 
 import com.joysistvi.petstocks.controller.UserController;
 import com.joysistvi.petstocks.model.User;
+import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.Scanner;
 
 public class RegistrationView {
-    private static final int HEADER_WIDTH = 40;
     private static final String PUBLIC_ROLE = "STAFF";
 
     private final UserController userController;
@@ -20,7 +20,7 @@ public class RegistrationView {
 
     public void run() {
         while (true) {
-            printHeader();
+            CliViewUtility.showHeader("Register Staff Account");
             System.out.print("Username (0 to cancel): ");
             String username = scanner.nextLine();
             if ("0".equals(username.trim())) {
@@ -59,10 +59,4 @@ public class RegistrationView {
         }
     }
 
-    private void printHeader() {
-        System.out.println();
-        System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("Register Staff Account");
-        System.out.println("=".repeat(HEADER_WIDTH));
-    }
 }
