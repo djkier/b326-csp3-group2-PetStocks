@@ -230,14 +230,24 @@ public class InventoryRepoImpl implements InventoryRepo {
                 "(product_id, quantity, expiration, batch_code, remark) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = dbConnection.getConnection();
-             PreparedStatement prep = conn.prepareStatement(query)) {
+             PreparedStatement prep = conn.prepareStatement(
+                     query, Statement.RETURN_GENERATED_KEYS)) {
 
             prep.setInt(1, inventory.getProduct().getId());
             prep.setInt(2, inventory.getQuantity());
             setNullableExpiration(prep, 3, inventory.getExpiration());
             prep.setString(4, inventory.getBatchCode());
             setNullableRemark(prep, 5, inventory.getRemark());
-            return prep.executeUpdate() > 0;
+            if (prep.executeUpdate() != 1) {
+                return false;
+            }
+
+            try (ResultSet keys = prep.getGeneratedKeys()) {
+                if (keys.next()) {
+                    inventory.setId(keys.getInt(1));
+                }
+            }
+            return inventory.getId() > 0;
         } catch (SQLException e) {
             System.err.println("Create Inventory Error: " + e.getMessage());
         }
