@@ -138,20 +138,24 @@ public class RestockView {
         Restock restock = new Restock(
                 inventory, supplier, datetimeDelivered, quantityDelivered, userId);
         boolean isSuccess = restockController.handleRecordStockIn(restock);
-        System.out.println(isSuccess
-                ? "Stock-in recorded and inventory quantity increased successfully."
-                : "Failed to record stock-in. No changes were committed.");
+        if (!isSuccess) {
+            System.out.println("Failed to record stock-in. No changes were committed.");
+            return true;
+        }
 
-        if (isSuccess) {
-            if (!promptForUser) {
-                System.out.println("Recorded by: " + currentUser.getUsername());
-            }
-            Restock recorded = restockController.handleFindRestockById(restock.getId());
-            if (recorded != null) {
-                System.out.println();
-                CliViewUtility.browsePages(
-                        List.of(recorded), scanner, this::printRestocks);
-            }
+        Restock recorded = restockController.handleFindRestockById(restock.getId());
+        CliViewUtility.showScreen("Stock In Recorded");
+        System.out.println("Stock-in recorded and inventory quantity increased successfully.");
+        if (!promptForUser) {
+            System.out.println();
+            System.out.println("Recorded by: " + currentUser.getUsername());
+        }
+        if (recorded != null) {
+            System.out.println();
+            printRestocks(List.of(recorded));
+        } else {
+            System.out.println();
+            System.out.println("The recorded stock-in details could not be loaded.");
         }
         return true;
     }
