@@ -132,7 +132,8 @@ public class DispatchView {
             Dispatch recorded = dispatchController.handleFindDispatchById(dispatch.getId());
             if (recorded != null) {
                 System.out.println();
-                printDispatches(List.of(recorded));
+                CliViewUtility.browsePages(
+                        List.of(recorded), scanner, this::printDispatches);
             }
         }
         return true;
@@ -140,24 +141,29 @@ public class DispatchView {
 
     private void viewDispatchHistory() {
         String sortBy = "date";
-        int choice;
+        int currentPage = 0;
 
-        do {
+        while (true) {
+            List<Dispatch> dispatches = dispatchController.handleViewDispatchHistory(sortBy);
+            currentPage = CliViewUtility.normalizePage(currentPage, dispatches.size());
             CliViewUtility.showHeader("Dispatch History");
-            printDispatches(dispatchController.handleViewDispatchHistory(sortBy));
-            System.out.println();
+            printDispatches(CliViewUtility.page(dispatches, currentPage));
+            CliViewUtility.printPagination(currentPage, dispatches.size());
             System.out.println("Sort by: [1] Date  [2] ID  [3] Product  [4] User  [0] Back");
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1 -> sortBy = "date";
-                case 2 -> sortBy = "id";
-                case 3 -> sortBy = "product";
-                case 4 -> sortBy = "user";
-                case 0 -> { }
+                case "1" -> { sortBy = "date"; currentPage = 0; }
+                case "2" -> { sortBy = "id"; currentPage = 0; }
+                case "3" -> { sortBy = "product"; currentPage = 0; }
+                case "4" -> { sortBy = "user"; currentPage = 0; }
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, dispatches.size());
+                case "0" -> { return; }
                 default -> System.out.println("Invalid sort selection.");
             }
-        } while (choice != 0);
+        }
     }
 
     private boolean findDispatchById() {
@@ -169,20 +175,24 @@ public class DispatchView {
 
         Dispatch dispatch = dispatchController.handleFindDispatchById(id);
         if (dispatch != null) {
-            printDispatches(List.of(dispatch));
+            CliViewUtility.browsePages(List.of(dispatch), scanner, this::printDispatches);
         }
         return true;
     }
 
     private boolean viewDispatchesByInventory() {
         CliViewUtility.showHeader("Dispatches By Inventory");
-        printInventoryChoices(inventoryController.handleViewAllInventory("id"));
+        CliViewUtility.browsePages(
+                inventoryController.handleViewAllInventory("id"),
+                scanner, this::printInventoryChoices);
         int inventoryId = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (inventoryId == 0) {
             return false;
         }
 
-        printDispatches(dispatchController.handleViewDispatchesByInventory(inventoryId));
+        CliViewUtility.browsePages(
+                dispatchController.handleViewDispatchesByInventory(inventoryId),
+                scanner, this::printDispatches);
         return true;
     }
 
@@ -190,27 +200,32 @@ public class DispatchView {
         CliViewUtility.showHeader("Dispatches By Product");
         List<Product> products = new ArrayList<>(productController.handleViewAllProducts("id"));
         products.addAll(productController.handleViewArchivedProducts("id"));
-        printProductChoices(products);
+        CliViewUtility.browsePages(products, scanner, this::printProductChoices);
 
         int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
         }
 
-        printDispatches(dispatchController.handleViewDispatchesByProduct(productId));
+        CliViewUtility.browsePages(
+                dispatchController.handleViewDispatchesByProduct(productId),
+                scanner, this::printDispatches);
         return true;
     }
 
     private boolean viewDispatchesByUser() {
         CliViewUtility.showHeader("Dispatches By User");
         Map<Integer, String> users = dispatchController.handleGetAvailableUsers();
-        printUserChoices(users);
+        CliViewUtility.browsePages(
+                new ArrayList<>(users.entrySet()), scanner, this::printUserChoices);
         int userId = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
         if (userId == 0) {
             return false;
         }
 
-        printDispatches(dispatchController.handleViewDispatchesByUser(userId));
+        CliViewUtility.browsePages(
+                dispatchController.handleViewDispatchesByUser(userId),
+                scanner, this::printDispatches);
         return true;
     }
 
@@ -239,7 +254,9 @@ public class DispatchView {
             endDate = InputUtility.parseDateOrNull(endInput);
         }
 
-        printDispatches(dispatchController.handleViewDispatchesByDateRange(startDate, endDate));
+        CliViewUtility.browsePages(
+                dispatchController.handleViewDispatchesByDateRange(startDate, endDate),
+                scanner, this::printDispatches);
         return true;
     }
 
@@ -250,7 +267,8 @@ public class DispatchView {
             return null;
         }
 
-        inventoryView.printStockMovementInventory(inventory);
+        CliViewUtility.browsePages(
+                inventory, scanner, inventoryView::printStockMovementInventory);
         while (true) {
             int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
             if (id == 0) {
@@ -272,7 +290,8 @@ public class DispatchView {
             return null;
         }
 
-        printUserChoices(users);
+        CliViewUtility.browsePages(
+                new ArrayList<>(users.entrySet()), scanner, this::printUserChoices);
         while (true) {
             int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
             if (id == 0) {
@@ -286,11 +305,6 @@ public class DispatchView {
     }
 
     private void printDispatches(List<Dispatch> dispatches) {
-        if (dispatches.isEmpty()) {
-            System.out.println("No dispatch records found.");
-            return;
-        }
-
         String border = "+" + "-".repeat(6) + "+" + "-".repeat(22)
                 + "+" + "-".repeat(16) + "+" + "-".repeat(16)
                 + "+" + "-".repeat(18) + "+" + "-".repeat(12)
@@ -301,6 +315,11 @@ public class DispatchView {
         System.out.printf(rowFormat, "ID", "Product", "Batch Code", "User",
                 "Dispatched", "Quantity", "Remaining");
         System.out.println(border);
+        if (dispatches.isEmpty()) {
+            System.out.println("No dispatch records found.");
+            System.out.println(border);
+            return;
+        }
         for (Dispatch dispatch : dispatches) {
             System.out.printf(rowFormat,
                     dispatch.getId(),
@@ -316,12 +335,12 @@ public class DispatchView {
     }
 
     private void printInventoryChoices(List<Inventory> inventory) {
+        System.out.printf("%-6s %-22s %-16s %-10s%n", "ID", "Product", "Batch Code", "Stock");
         if (inventory.isEmpty()) {
             System.out.println("No inventory records found.");
             return;
         }
 
-        System.out.printf("%-6s %-22s %-16s %-10s%n", "ID", "Product", "Batch Code", "Stock");
         for (Inventory item : inventory) {
             System.out.printf("%-6d %-22s %-16s %-10d%n",
                     item.getId(),
@@ -332,12 +351,12 @@ public class DispatchView {
     }
 
     private void printProductChoices(List<Product> products) {
+        System.out.printf("%-6s %-28s %-10s%n", "ID", "Product", "Status");
         if (products.isEmpty()) {
             System.out.println("No products found.");
             return;
         }
 
-        System.out.printf("%-6s %-28s %-10s%n", "ID", "Product", "Status");
         for (Product product : products) {
             System.out.printf("%-6d %-28s %-10s%n",
                     product.getId(), CliViewUtility.truncate(product.getName(), 28),
@@ -345,15 +364,15 @@ public class DispatchView {
         }
     }
 
-    private void printUserChoices(Map<Integer, String> users) {
+    private void printUserChoices(List<Map.Entry<Integer, String>> users) {
+        System.out.printf("%-6s %-30s%n", "ID", "Username");
         if (users.isEmpty()) {
             System.out.println("No users found.");
             return;
         }
 
-        System.out.printf("%-6s %-30s%n", "ID", "Username");
-        users.forEach((id, username) ->
-                System.out.printf("%-6d %-30s%n", id, CliViewUtility.truncate(username, 30)));
+        users.forEach(user -> System.out.printf("%-6d %-30s%n",
+                user.getKey(), CliViewUtility.truncate(user.getValue(), 30)));
     }
 
 }
