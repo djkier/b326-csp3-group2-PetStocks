@@ -25,14 +25,18 @@ public class DispatchView {
     private final DispatchController dispatchController;
     private final InventoryController inventoryController;
     private final ProductController productController;
+    private final InventoryView inventoryView;
     private final Scanner scanner;
 
     public DispatchView(DispatchController dispatchController,
                         InventoryController inventoryController,
-                        ProductController productController, Scanner scanner) {
+                        ProductController productController,
+                        InventoryView inventoryView,
+                        Scanner scanner) {
         this.dispatchController = dispatchController;
         this.inventoryController = inventoryController;
         this.productController = productController;
+        this.inventoryView = inventoryView;
         this.scanner = scanner;
     }
 
@@ -246,7 +250,7 @@ public class DispatchView {
             return null;
         }
 
-        printInventoryChoices(inventory);
+        inventoryView.printStockMovementInventory(inventory);
         while (true) {
             int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
             if (id == 0) {

@@ -457,6 +457,38 @@ public class InventoryView {
         System.out.println(border);
     }
 
+    public void printStockMovementInventory(List<Inventory> inventory) {
+        String border = "+" + "-".repeat(ID_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(PRODUCT_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(BRAND_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(QUANTITY_DISPLAY_WIDTH + 2)
+                + "+" + "-".repeat(BATCH_DISPLAY_WIDTH + 2) + "+";
+        String rowFormat = "| %-" + ID_DISPLAY_WIDTH + "s | %-"
+                + PRODUCT_DISPLAY_WIDTH + "s | %-" + BRAND_DISPLAY_WIDTH + "s | %-"
+                + QUANTITY_DISPLAY_WIDTH + "s | %-" + BATCH_DISPLAY_WIDTH + "s |%n";
+
+        System.out.println(border);
+        System.out.printf(rowFormat, "ID", "Product", "Brand", "Quantity", "Batch Code");
+        System.out.println(border);
+
+        if (inventory.isEmpty()) {
+            System.out.println("No Inventory Records Found.");
+            System.out.println(border);
+            return;
+        }
+
+        for (Inventory item : inventory) {
+            Product product = item.getProduct();
+            System.out.printf(rowFormat,
+                    item.getId(),
+                    CliViewUtility.truncate(product.getName(), PRODUCT_DISPLAY_WIDTH),
+                    CliViewUtility.truncate(product.getBrand(), BRAND_DISPLAY_WIDTH),
+                    item.getQuantity(),
+                    CliViewUtility.truncate(item.getBatchCode(), BATCH_DISPLAY_WIDTH));
+        }
+        System.out.println(border);
+    }
+
     private void printSortOptions() {
         System.out.println();
         System.out.println("Sort by: [1] ID    [2] Product    [3] Quantity    [4] Expiration    [0] Back");
