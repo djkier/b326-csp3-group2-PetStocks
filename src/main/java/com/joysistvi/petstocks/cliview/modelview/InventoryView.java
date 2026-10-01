@@ -67,7 +67,7 @@ public class InventoryView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Inventory Management");
+        CliViewUtility.showScreen("Inventory Management");
         System.out.println("1. View All Inventory");
         System.out.println("2. Find Inventory by ID");
         System.out.println("3. View Inventory by Product");
@@ -87,7 +87,7 @@ public class InventoryView {
         while (true) {
             List<Inventory> inventory = inventoryController.handleViewAllInventory(sortBy);
             currentPage = CliViewUtility.normalizePage(currentPage, inventory.size());
-            CliViewUtility.showHeader("All Inventory");
+            CliViewUtility.showScreen("All Inventory");
             printInventory(CliViewUtility.page(inventory, currentPage));
             CliViewUtility.printPagination(currentPage, inventory.size());
             printSortOptions();
@@ -111,16 +111,19 @@ public class InventoryView {
                     sortBy = "expiration";
                     currentPage = 0;
                 }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, inventory.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, inventory.size(), scanner);
                 case "0" -> { return; }
-                default -> System.out.println("Invalid sort selection.");
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     public boolean findInventoryById() {
-        CliViewUtility.showHeader("Find Inventory By ID");
+        CliViewUtility.showScreen("Find Inventory By ID");
         int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -135,7 +138,7 @@ public class InventoryView {
     }
 
     private boolean viewInventoryByProduct() {
-        CliViewUtility.showHeader("Inventory By Product");
+        CliViewUtility.showScreen("Inventory By Product");
         int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
@@ -148,7 +151,7 @@ public class InventoryView {
     }
 
     public void searchInventory() {
-        CliViewUtility.showHeader("Search Inventory");
+        CliViewUtility.showScreen("Search Inventory");
         System.out.print("Enter product, brand, batch code, or remark: ");
         String keyword = scanner.nextLine();
         CliViewUtility.browsePages(
@@ -162,12 +165,12 @@ public class InventoryView {
         while (true) {
             List<Inventory> inventory = switch (display) {
                 case LOW_STOCK -> {
-                    CliViewUtility.showHeader("Low-Stock Inventory");
+                    CliViewUtility.showScreen("Low-Stock Inventory");
                     System.out.println("Showing inventory with stock quantities below 10.");
                     yield inventoryController.handleViewLowStockInventory();
                 }
                 case OUT_OF_STOCK -> {
-                    CliViewUtility.showHeader("Out-of-Stock Inventory");
+                    CliViewUtility.showScreen("Out-of-Stock Inventory");
                     System.out.println("Showing out-of-stock inventory.");
                     yield inventoryController.handleViewOutOfStockInventory();
                 }
@@ -188,12 +191,15 @@ public class InventoryView {
                     display = LowStockDisplay.LOW_STOCK;
                     currentPage = 0;
                 }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, inventory.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, inventory.size(), scanner);
                 case "0" -> {
                     return;
                 }
-                default -> System.out.println("Invalid menu selection.");
+                default -> {
+                    System.out.println("Invalid menu selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
@@ -205,11 +211,11 @@ public class InventoryView {
         while (true) {
             List<Inventory> inventory = switch (display) {
                 case EXPIRED -> {
-                    CliViewUtility.showHeader("Expired Inventory");
+                    CliViewUtility.showScreen("Expired Inventory");
                     yield inventoryController.handleViewExpiredInventory();
                 }
                 case EXPIRING -> {
-                    CliViewUtility.showHeader("Inventory Expiring Within 60 Days");
+                    CliViewUtility.showScreen("Inventory Expiring Within 60 Days");
                     yield inventoryController.handleViewExpiringInventory();
                 }
             };
@@ -229,18 +235,21 @@ public class InventoryView {
                     display = ExpirationDisplay.EXPIRING;
                     currentPage = 0;
                 }
-                case "P" -> currentPage = CliViewUtility.previousPage(currentPage);
-                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, inventory.size());
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, inventory.size(), scanner);
                 case "0" -> {
                     return;
                 }
-                default -> System.out.println("Invalid menu selection.");
+                default -> {
+                    System.out.println("Invalid menu selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
         }
     }
 
     private void viewInventoryByBatchCode() {
-        CliViewUtility.showHeader("Inventory By Batch Code");
+        CliViewUtility.showScreen("Inventory By Batch Code");
         System.out.print("Batch code: ");
         String batchCode = scanner.nextLine();
         CliViewUtility.browsePages(
@@ -249,7 +258,7 @@ public class InventoryView {
     }
 
     private boolean createInventory() {
-        CliViewUtility.showHeader("Create Inventory Record (Testing)");
+        CliViewUtility.showScreen("Create Inventory Record (Testing)");
         Product product = selectActiveProduct(null);
         if (product == null) {
             return false;
@@ -290,7 +299,7 @@ public class InventoryView {
         }
 
         while (true) {
-            CliViewUtility.showHeader("Create Initial Inventory Batch");
+            CliViewUtility.showScreen("Create Initial Inventory Batch");
             System.out.println("Product: " + product.getName());
             System.out.print("Batch code (0 to cancel): ");
             String batchCode = scanner.nextLine();
@@ -336,7 +345,7 @@ public class InventoryView {
     }
 
     private boolean updateInventory() {
-        CliViewUtility.showHeader("Update Inventory Record (Testing)");
+        CliViewUtility.showScreen("Update Inventory Record (Testing)");
         CliViewUtility.browsePages(
                 inventoryController.handleViewAllInventory("id"),
                 scanner, this::printInventory);
