@@ -32,8 +32,7 @@ public class StaffInventoryView {
                     InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
                 case 4 -> inventoryView.viewLowStockInventory();
-                case 5 -> CliViewUtility.pauseAfter(
-                        scanner, inventoryView.viewExpiringInventory());
+                case 5 -> inventoryView.viewExpiringInventory();
                 case 0 -> { }
                 default -> {
                     System.out.println("Invalid menu selection.");

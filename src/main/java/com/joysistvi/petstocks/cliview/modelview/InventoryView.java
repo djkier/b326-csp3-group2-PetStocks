@@ -50,7 +50,7 @@ public class InventoryView {
                     InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                 }
                 case 5 -> viewLowStockInventory();
-                case 6 -> CliViewUtility.pauseAfter(scanner, viewExpiringInventory());
+                case 6 -> viewExpiringInventory();
                 case 7 -> {
                     viewInventoryByBatchCode();
                     InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
@@ -163,15 +163,32 @@ public class InventoryView {
         }
     }
 
-    public boolean viewExpiringInventory() {
-        CliViewUtility.showHeader("Expiring Inventory");
-        int daysAhead = InputUtility.readInt(scanner, "Show batches expiring within how many days? (-1 to cancel): ");
-        if (daysAhead == -1) {
-            return false;
-        }
+    public void viewExpiringInventory() {
+        ExpirationDisplay display = ExpirationDisplay.EXPIRING;
 
-        printInventory(inventoryController.handleViewExpiringInventory(daysAhead));
-        return true;
+        while (true) {
+            switch (display) {
+                case EXPIRED -> {
+                    CliViewUtility.showHeader("Expired Inventory");
+                    printInventory(inventoryController.handleViewExpiredInventory());
+                }
+                case EXPIRING -> {
+                    CliViewUtility.showHeader("Inventory Expiring Within 60 Days");
+                    printInventory(inventoryController.handleViewExpiringInventory());
+                }
+            }
+
+            printExpirationOptions();
+            int choice = InputUtility.readInt(scanner, "Choice: ");
+            switch (choice) {
+                case 1 -> display = ExpirationDisplay.EXPIRED;
+                case 2 -> display = ExpirationDisplay.EXPIRING;
+                case 0 -> {
+                    return;
+                }
+                default -> System.out.println("Invalid menu selection.");
+            }
+        }
     }
 
     private void viewInventoryByBatchCode() {
@@ -399,6 +416,12 @@ public class InventoryView {
                 "View: [1] Out-of-Stock        [2] View Low-Stock Inventory        [0] Back");
     }
 
+    private void printExpirationOptions() {
+        System.out.println();
+        System.out.println(
+                "View: [1] Expired        [2] Expiring Within 60 Days        [0] Back");
+    }
+
     private DateInput promptExpiration(String prompt, LocalDate currentValue,
                                        boolean allowKeep) {
         while (true) {
@@ -435,6 +458,11 @@ public class InventoryView {
     private enum LowStockDisplay {
         LOW_STOCK,
         OUT_OF_STOCK
+    }
+
+    private enum ExpirationDisplay {
+        EXPIRED,
+        EXPIRING
     }
 
 }
