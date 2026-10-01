@@ -10,7 +10,8 @@ public interface InventoryService {
     Inventory getInventoryById(int id);
     List<Inventory> getInventoryByProductId(int productId);
     List<Inventory> searchInventory(String keyword);
-    List<Inventory> getLowStockInventory(int maximumQuantity);
+    List<Inventory> getLowStockInventory();
+    List<Inventory> getOutOfStockInventory();
     List<Inventory> getExpiringInventory(int daysAhead);
     List<Inventory> getInventoryByBatchCode(String batchCode);
     boolean createInventory(Inventory inventory);

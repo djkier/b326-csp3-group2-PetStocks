@@ -11,7 +11,8 @@ public interface InventoryRepo {
     Inventory getInventoryById(int id);
     List<Inventory> getInventoryByProductId(int productId);
     List<Inventory> searchInventory(String keyword);
-    List<Inventory> getLowStockInventory(int maximumQuantity);
+    List<Inventory> getLowStockInventory(int exclusiveUpperBound);
+    List<Inventory> getOutOfStockInventory();
     List<Inventory> getExpiringInventory(LocalDate startDate, LocalDate endDate);
     List<Inventory> getInventoryByBatchCode(String batchCode);
     boolean createInventory(Inventory inventory);
