@@ -8,6 +8,7 @@ public interface UserRepo {
     List<User> getAllUsers();
     List<User> getAllUsers(String sortBy);
     User getUserById(int id);
+    User getUserByUsername(String username);
     List<User> searchUsers(String keyword);
     boolean usernameExists(String username);
     boolean usernameExistsForAnotherUser(String username, int userId);
