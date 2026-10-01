@@ -346,25 +346,35 @@ public class RestockView {
     private Supplier selectActiveSupplier() {
         CliViewUtility.showHeader("Select Supplier");
         List<Supplier> suppliers = supplierController.handleViewAllSuppliers();
-        CliViewUtility.browsePages(suppliers, scanner, supplierView::printSuppliers);
+        int currentPage = 0;
 
         while (true) {
+            currentPage = CliViewUtility.normalizePage(currentPage, suppliers.size());
+            supplierView.printSuppliers(CliViewUtility.page(suppliers, currentPage));
+            CliViewUtility.printPagination(currentPage, suppliers.size());
             System.out.println();
             System.out.println("[1] Select Supplier ID");
             System.out.println("[2] Add Custom Supplier");
             System.out.println("[0] Cancel");
-            int choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1:
+                case "P":
+                    currentPage = CliViewUtility.previousPage(currentPage);
+                    break;
+                case "N":
+                    currentPage = CliViewUtility.nextPage(currentPage, suppliers.size());
+                    break;
+                case "1":
                     if (suppliers.isEmpty()) {
                         System.out.println("No active suppliers are available to select.");
                         break;
                     }
                     return selectSupplierById(suppliers);
-                case 2:
+                case "2":
                     return supplierView.createSupplierForStockIn();
-                case 0:
+                case "0":
                     return null;
                 default:
                     System.out.println("Invalid menu selection.");
