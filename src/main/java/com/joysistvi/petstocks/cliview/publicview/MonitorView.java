@@ -1,7 +1,6 @@
 package com.joysistvi.petstocks.cliview.publicview;
 
 import com.joysistvi.petstocks.cliview.modelview.InventoryView;
-import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.Scanner;
@@ -26,8 +25,7 @@ public class MonitorView {
 
             switch (choice) {
                 case 1 -> inventoryView.viewLowStockInventory();
-                case 2 -> CliViewUtility.pauseAfter(
-                        scanner, inventoryView.viewExpiringInventory());
+                case 2 -> inventoryView.viewExpiringInventory();
                 case 0 -> { }
                 default -> {
                     System.out.println("Invalid menu selection.");

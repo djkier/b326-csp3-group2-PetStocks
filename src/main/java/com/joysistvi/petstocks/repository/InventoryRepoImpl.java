@@ -162,19 +162,45 @@ public class InventoryRepoImpl implements InventoryRepo {
     }
 
     @Override
-    public List<Inventory> getExpiringInventory(LocalDate startDate, LocalDate endDate) {
+    public List<Inventory> getExpiringInventory() {
         List<Inventory> inventory = new ArrayList<>();
         String query = INVENTORY_SELECT +
-                "WHERE i.expiration BETWEEN ? AND ? ORDER BY i.expiration, p.name";
+                "WHERE i.expiration IS NOT NULL " +
+                "AND i.expiration >= CURRENT_DATE " +
+                "AND i.expiration <= DATE_ADD(CURRENT_DATE, INTERVAL 60 DAY) " +
+                "ORDER BY i.expiration, p.name";
 
         try (Connection conn = dbConnection.getConnection();
-             PreparedStatement prep = conn.prepareStatement(query)) {
+             Statement statement = conn.createStatement();
+             ResultSet result = statement.executeQuery(query)) {
 
-            prep.setDate(1, Date.valueOf(startDate));
-            prep.setDate(2, Date.valueOf(endDate));
-            addResults(prep, inventory);
+            while (result.next()) {
+                inventory.add(mapInventory(result));
+            }
         } catch (SQLException e) {
             System.err.println("Get Expiring Inventory Error: " + e.getMessage());
+        }
+
+        return inventory;
+    }
+
+    @Override
+    public List<Inventory> getExpiredInventory() {
+        List<Inventory> inventory = new ArrayList<>();
+        String query = INVENTORY_SELECT +
+                "WHERE i.expiration IS NOT NULL " +
+                "AND i.expiration < CURRENT_DATE " +
+                "ORDER BY i.expiration, p.name";
+
+        try (Connection conn = dbConnection.getConnection();
+             Statement statement = conn.createStatement();
+             ResultSet result = statement.executeQuery(query)) {
+
+            while (result.next()) {
+                inventory.add(mapInventory(result));
+            }
+        } catch (SQLException e) {
+            System.err.println("Get Expired Inventory Error: " + e.getMessage());
         }
 
         return inventory;

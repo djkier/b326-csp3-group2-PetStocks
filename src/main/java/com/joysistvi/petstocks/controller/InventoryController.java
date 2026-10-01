@@ -40,8 +40,12 @@ public class InventoryController {
         return inventoryService.getOutOfStockInventory();
     }
 
-    public List<Inventory> handleViewExpiringInventory(int daysAhead) {
-        return inventoryService.getExpiringInventory(daysAhead);
+    public List<Inventory> handleViewExpiringInventory() {
+        return inventoryService.getExpiringInventory();
+    }
+
+    public List<Inventory> handleViewExpiredInventory() {
+        return inventoryService.getExpiredInventory();
     }
 
     public List<Inventory> handleViewInventoryByBatchCode(String batchCode) {
