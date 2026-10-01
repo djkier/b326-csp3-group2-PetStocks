@@ -10,8 +10,10 @@ import com.joysistvi.petstocks.cliview.modelview.SupplierView;
 import com.joysistvi.petstocks.cliview.modelview.UserView;
 import com.joysistvi.petstocks.cliview.publicview.AdminMainView;
 import com.joysistvi.petstocks.cliview.publicview.AdminManagementView;
+import com.joysistvi.petstocks.cliview.publicview.LandingView;
 import com.joysistvi.petstocks.cliview.publicview.LoginView;
 import com.joysistvi.petstocks.cliview.publicview.MonitorView;
+import com.joysistvi.petstocks.cliview.publicview.RegistrationView;
 import com.joysistvi.petstocks.cliview.publicview.StaffInventoryView;
 import com.joysistvi.petstocks.cliview.publicview.StaffMainView;
 import com.joysistvi.petstocks.cliview.publicview.StockMovementView;
@@ -124,20 +126,42 @@ public class App {
                     staffInventoryView, restockView, dispatchView,
                     stockMovementView, monitorView, adminManagementView, scanner);
             LoginView loginView = new LoginView(userController, scanner);
+            RegistrationView registrationView = new RegistrationView(userController, scanner);
+            LandingView landingView = new LandingView(scanner);
 
-            runLoginMenu(loginView, staffMainView, adminMainView);
+            runApplication(
+                    landingView, loginView, registrationView, staffMainView, adminMainView);
         }
     }
 
-    private static void runLoginMenu(LoginView loginView, StaffMainView staffMainView,
-                                     AdminMainView adminMainView) {
+    private static void runApplication(LandingView landingView, LoginView loginView,
+                                       RegistrationView registrationView,
+                                       StaffMainView staffMainView,
+                                       AdminMainView adminMainView) {
+        while (true) {
+            LandingView.Selection selection = landingView.promptForSelection();
+
+            switch (selection) {
+                case LOGIN -> runLoginWorkflow(loginView, staffMainView, adminMainView);
+                case REGISTER -> registrationView.run();
+                case EXIT -> {
+                    System.out.println("Exiting PetStock...");
+                    return;
+                }
+            }
+        }
+    }
+
+    private static void runLoginWorkflow(LoginView loginView,
+                                         StaffMainView staffMainView,
+                                         AdminMainView adminMainView) {
         while (true) {
             User currentUser = loginView.promptForLogin();
             if (currentUser == null) {
-                System.out.println("Exiting PetStock...");
                 return;
             }
 
+            loginView.showWelcome(currentUser);
             switch (currentUser.getRole()) {
                 case "STAFF" -> staffMainView.run(currentUser);
                 case "ADMIN" -> adminMainView.run(currentUser);
