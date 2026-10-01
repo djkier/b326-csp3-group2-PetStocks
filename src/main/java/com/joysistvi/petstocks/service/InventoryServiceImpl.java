@@ -5,7 +5,6 @@ import com.joysistvi.petstocks.model.Product;
 import com.joysistvi.petstocks.repository.InventoryRepo;
 import com.joysistvi.petstocks.repository.ProductRepo;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public class InventoryServiceImpl implements InventoryService {
@@ -78,14 +77,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public List<Inventory> getExpiringInventory(int daysAhead) {
-        if (daysAhead < 0) {
-            System.out.println("Expiration window cannot be negative.");
-            return List.of();
-        }
+    public List<Inventory> getExpiringInventory() {
+        return inventoryRepo.getExpiringInventory();
+    }
 
-        LocalDate startDate = LocalDate.now();
-        return inventoryRepo.getExpiringInventory(startDate, startDate.plusDays(daysAhead));
+    @Override
+    public List<Inventory> getExpiredInventory() {
+        return inventoryRepo.getExpiredInventory();
     }
 
     @Override

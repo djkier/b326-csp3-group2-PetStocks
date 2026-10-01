@@ -2,7 +2,6 @@ package com.joysistvi.petstocks.repository;
 
 import com.joysistvi.petstocks.model.Inventory;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface InventoryRepo {
@@ -13,7 +12,8 @@ public interface InventoryRepo {
     List<Inventory> searchInventory(String keyword);
     List<Inventory> getLowStockInventory(int exclusiveUpperBound);
     List<Inventory> getOutOfStockInventory();
-    List<Inventory> getExpiringInventory(LocalDate startDate, LocalDate endDate);
+    List<Inventory> getExpiringInventory();
+    List<Inventory> getExpiredInventory();
     List<Inventory> getInventoryByBatchCode(String batchCode);
     boolean createInventory(Inventory inventory);
     boolean updateInventory(Inventory inventory);

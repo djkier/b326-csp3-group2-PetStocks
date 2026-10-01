@@ -12,7 +12,8 @@ public interface InventoryService {
     List<Inventory> searchInventory(String keyword);
     List<Inventory> getLowStockInventory();
     List<Inventory> getOutOfStockInventory();
-    List<Inventory> getExpiringInventory(int daysAhead);
+    List<Inventory> getExpiringInventory();
+    List<Inventory> getExpiredInventory();
     List<Inventory> getInventoryByBatchCode(String batchCode);
     boolean createInventory(Inventory inventory);
     boolean updateInventory(Inventory inventory);
