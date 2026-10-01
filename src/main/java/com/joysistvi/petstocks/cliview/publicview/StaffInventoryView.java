@@ -7,8 +7,6 @@ import com.joysistvi.petstocks.utility.InputUtility;
 import java.util.Scanner;
 
 public class StaffInventoryView {
-    private static final int HEADER_WIDTH = 40;
-
     private final InventoryView inventoryView;
     private final Scanner scanner;
 
@@ -43,10 +41,7 @@ public class StaffInventoryView {
     }
 
     private void printMenu() {
-        System.out.println();
-        System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("Inventory");
-        System.out.println("=".repeat(HEADER_WIDTH));
+        CliViewUtility.showScreen("Inventory");
         System.out.println("1. View All Inventory");
         System.out.println("2. Find Inventory by ID");
         System.out.println("3. Search Inventory");

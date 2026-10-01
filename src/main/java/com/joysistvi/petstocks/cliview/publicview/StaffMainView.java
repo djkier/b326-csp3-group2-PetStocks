@@ -9,8 +9,6 @@ import com.joysistvi.petstocks.utility.InputUtility;
 import java.util.Scanner;
 
 public class StaffMainView {
-    private static final int HEADER_WIDTH = 40;
-
     private final StaffInventoryView staffInventoryView;
     private final RestockView restockView;
     private final DispatchView dispatchView;
@@ -30,19 +28,23 @@ public class StaffMainView {
     }
 
     public void run(User currentUser) {
-        int choice;
+        boolean logoutConfirmed = false;
 
-        do {
+        while (!logoutConfirmed) {
             printMenu();
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            int choice = InputUtility.readInt(scanner, "Choice: ");
 
             if (choice == 0) {
-                System.out.println("Logging out...");
+                logoutConfirmed = CliViewUtility.confirmChoice(
+                        scanner, "Logout Confirmation", "Are you sure you want to log out?");
+                if (logoutConfirmed) {
+                    System.out.println("Logging out...");
+                }
             } else if (!handleOperationalSelection(choice, currentUser)) {
                 System.out.println("Invalid menu selection.");
                 InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
             }
-        } while (choice != 0);
+        }
     }
 
     public boolean handleOperationalSelection(int choice, User currentUser) {
@@ -68,10 +70,7 @@ public class StaffMainView {
     }
 
     private void printMenu() {
-        System.out.println();
-        System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("Staff Menu");
-        System.out.println("=".repeat(HEADER_WIDTH));
+        CliViewUtility.showScreen("Staff Menu");
         printOperationalOptions();
         System.out.println("0. Logout");
     }

@@ -50,7 +50,7 @@ public class ProductPetTypeView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Product Pet Type Management");
+        CliViewUtility.showScreen("Product Pet Type Management");
         System.out.println("1. Assign Pet Type to Product");
         System.out.println("2. Remove Pet Type from Product");
         System.out.println("3. View Pet Types Assigned to a Product");
@@ -60,7 +60,7 @@ public class ProductPetTypeView {
     }
 
     private boolean assignPetTypeToProduct() {
-        CliViewUtility.showHeader("Assign Pet Type to Product");
+        CliViewUtility.showScreen("Assign Pet Type to Product");
 
         Product product = selectActiveProduct();
         if (product == null) {
@@ -81,7 +81,7 @@ public class ProductPetTypeView {
     }
 
     private boolean removePetTypeFromProduct() {
-        CliViewUtility.showHeader("Remove Pet Type from Product");
+        CliViewUtility.showScreen("Remove Pet Type from Product");
         int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
@@ -94,7 +94,8 @@ public class ProductPetTypeView {
             return true;
         }
 
-        printRelationships(relationships);
+        CliViewUtility.browsePages(
+                relationships, scanner, this::printRelationships);
         int petTypeId = InputUtility.readInt(scanner, "Pet type ID to remove (0 to cancel): ");
         if (petTypeId == 0) {
             return false;
@@ -109,7 +110,7 @@ public class ProductPetTypeView {
     }
 
     private boolean viewPetTypesByProduct() {
-        CliViewUtility.showHeader("Pet Types Assigned to Product");
+        CliViewUtility.showScreen("Pet Types Assigned to Product");
         int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
@@ -117,12 +118,13 @@ public class ProductPetTypeView {
 
         List<ProductPetType> relationships =
                 productPetTypeController.handleViewPetTypesByProductId(productId);
-        printRelationships(relationships);
+        CliViewUtility.browsePages(
+                relationships, scanner, this::printRelationships);
         return true;
     }
 
     private boolean viewProductsByPetType() {
-        CliViewUtility.showHeader("Products Assigned to Pet Type");
+        CliViewUtility.showScreen("Products Assigned to Pet Type");
         int petTypeId = InputUtility.readInt(scanner, "Pet type ID (0 to cancel): ");
         if (petTypeId == 0) {
             return false;
@@ -130,12 +132,13 @@ public class ProductPetTypeView {
 
         List<ProductPetType> relationships =
                 productPetTypeController.handleViewProductsByPetTypeId(petTypeId);
-        printRelationships(relationships);
+        CliViewUtility.browsePages(
+                relationships, scanner, this::printRelationships);
         return true;
     }
 
     private boolean checkRelationship() {
-        CliViewUtility.showHeader("Check Product-Pet Type Relationship");
+        CliViewUtility.showScreen("Check Product-Pet Type Relationship");
         int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
         if (productId == 0) {
             return false;
@@ -160,7 +163,7 @@ public class ProductPetTypeView {
             return null;
         }
 
-        printProductChoices(products);
+        CliViewUtility.browsePages(products, scanner, this::printProductChoices);
         while (true) {
             int productId = InputUtility.readInt(scanner, "Product ID (0 to cancel): ");
             if (productId == 0) {
@@ -183,7 +186,7 @@ public class ProductPetTypeView {
             return null;
         }
 
-        printPetTypeChoices(petTypes);
+        CliViewUtility.browsePages(petTypes, scanner, this::printPetTypeChoices);
         while (true) {
             int petTypeId = InputUtility.readInt(scanner, "Pet type ID (0 to cancel): ");
             if (petTypeId == 0) {
@@ -232,11 +235,6 @@ public class ProductPetTypeView {
     }
 
     public void printRelationships(List<ProductPetType> relationships) {
-        if (relationships.isEmpty()) {
-            System.out.println("No product-pet type relationships found.");
-            return;
-        }
-
         String border = "+" + "-".repeat(6) + "+" + "-".repeat(27)
                 + "+" + "-".repeat(22) + "+" + "-".repeat(27)
                 + "+" + "-".repeat(27) + "+" + "-".repeat(12) + "+" + "-".repeat(12) + "+";
@@ -247,6 +245,12 @@ public class ProductPetTypeView {
         System.out.printf("| %-4s | %-25s | %-20s | %-25s | %-25s | %-10s | %-10s |%n",
                 "", "", "", "", "", "Status", "Status");
         System.out.println(border);
+
+        if (relationships.isEmpty()) {
+            System.out.println("No product-pet type relationships found.");
+            System.out.println(border);
+            return;
+        }
 
         for (ProductPetType relationship : relationships) {
             Product product = relationship.getProduct();

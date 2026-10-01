@@ -74,7 +74,7 @@ public class RestockView {
     }
 
     private void printMenu() {
-        CliViewUtility.showHeader("Restock / Stock-In Management");
+        CliViewUtility.showScreen("Restock / Stock-In Management");
         System.out.println("1. Record Stock In");
         System.out.println("2. View Restock History");
         System.out.println("3. Find Restock by ID");
@@ -98,7 +98,7 @@ public class RestockView {
     }
 
     private boolean recordStockIn(User currentUser, boolean promptForUser) {
-        CliViewUtility.showHeader("Record Stock In");
+        CliViewUtility.showScreen("Record Stock In");
 
         Inventory inventory = selectStockInInventory();
         if (inventory == null) {
@@ -138,48 +138,66 @@ public class RestockView {
         Restock restock = new Restock(
                 inventory, supplier, datetimeDelivered, quantityDelivered, userId);
         boolean isSuccess = restockController.handleRecordStockIn(restock);
-        System.out.println(isSuccess
-                ? "Stock-in recorded and inventory quantity increased successfully."
-                : "Failed to record stock-in. No changes were committed.");
+        if (!isSuccess) {
+            System.out.println("Failed to record stock-in. No changes were committed.");
+            return true;
+        }
 
-        if (isSuccess) {
-            if (!promptForUser) {
-                System.out.println("Recorded by: " + currentUser.getUsername());
-            }
-            Restock recorded = restockController.handleFindRestockById(restock.getId());
-            if (recorded != null) {
-                System.out.println();
-                printRestocks(List.of(recorded));
-            }
+        Inventory updatedInventory = inventoryController.handleGetInventoryById(inventory.getId());
+        CliViewUtility.showScreen("Stock In Recorded");
+        System.out.println("Stock-in recorded and inventory quantity increased successfully.");
+        if (!promptForUser) {
+            System.out.println();
+            System.out.println("Recorded by: " + currentUser.getUsername());
+        }
+        if (updatedInventory != null) {
+            System.out.println();
+            inventoryView.printStockResult(updatedInventory, quantityDelivered, "Added");
+        } else {
+            System.out.println();
+            System.out.println("The updated inventory details could not be loaded.");
         }
         return true;
     }
 
     private Inventory selectStockInInventory() {
         List<Inventory> inventory = inventoryController.handleViewAllInventory();
-        System.out.println();
-        inventoryView.printStockMovementInventory(inventory);
+        int currentPage = 0;
 
         while (true) {
+            CliViewUtility.showScreen("Record Stock In");
+            currentPage = CliViewUtility.normalizePage(currentPage, inventory.size());
+            inventoryView.printStockMovementInventory(
+                    CliViewUtility.page(inventory, currentPage));
+            CliViewUtility.printPagination(currentPage, inventory.size());
             System.out.println();
             System.out.println("[1] Select Inventory ID");
             System.out.println("[2] Product Not Found / Add New Product");
             System.out.println("[0] Cancel");
-            int choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1:
+                case "P":
+                    currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                    break;
+                case "N":
+                    currentPage = CliViewUtility.nextPage(currentPage, inventory.size(), scanner);
+                    break;
+                case "1":
                     if (inventory.isEmpty()) {
                         System.out.println("No inventory records are available to select.");
+                        InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                         break;
                     }
                     return selectInventoryById(inventory);
-                case 2:
+                case "2":
                     return createNewProductInventory();
-                case 0:
+                case "0":
                     return null;
                 default:
                     System.out.println("Invalid menu selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
             }
         }
     }
@@ -199,30 +217,38 @@ public class RestockView {
 
     private void viewRestockHistory() {
         String sortBy = "date";
-        int choice;
+        int currentPage = 0;
 
-        do {
-            CliViewUtility.showHeader("Restock History");
-            printRestocks(restockController.handleViewRestockHistory(sortBy));
-            System.out.println();
+        while (true) {
+            List<Restock> restocks = restockController.handleViewRestockHistory(sortBy);
+            currentPage = CliViewUtility.normalizePage(currentPage, restocks.size());
+            CliViewUtility.showScreen("Restock History");
+            printRestocks(CliViewUtility.page(restocks, currentPage));
+            CliViewUtility.printPagination(currentPage, restocks.size());
             System.out.println("Sort by: [1] Date  [2] ID  [3] Product  " +
                     "[4] Supplier  [5] User  [0] Back");
-            choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1 -> sortBy = "date";
-                case 2 -> sortBy = "id";
-                case 3 -> sortBy = "product";
-                case 4 -> sortBy = "supplier";
-                case 5 -> sortBy = "user";
-                case 0 -> { }
-                default -> System.out.println("Invalid sort selection.");
+                case "1" -> { sortBy = "date"; currentPage = 0; }
+                case "2" -> { sortBy = "id"; currentPage = 0; }
+                case "3" -> { sortBy = "product"; currentPage = 0; }
+                case "4" -> { sortBy = "supplier"; currentPage = 0; }
+                case "5" -> { sortBy = "user"; currentPage = 0; }
+                case "P" -> currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                case "N" -> currentPage = CliViewUtility.nextPage(currentPage, restocks.size(), scanner);
+                case "0" -> { return; }
+                default -> {
+                    System.out.println("Invalid sort selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
+                }
             }
-        } while (choice != 0);
+        }
     }
 
     private boolean findRestockById() {
-        CliViewUtility.showHeader("Find Restock By ID");
+        CliViewUtility.showScreen("Find Restock By ID");
         int id = InputUtility.readInt(scanner, "Restock ID (0 to cancel): ");
         if (id == 0) {
             return false;
@@ -230,25 +256,27 @@ public class RestockView {
 
         Restock restock = restockController.handleFindRestockById(id);
         if (restock != null) {
-            printRestocks(List.of(restock));
+            CliViewUtility.browsePages(List.of(restock), scanner, this::printRestocks);
         }
         return true;
     }
 
     private boolean viewRestocksByInventory() {
-        CliViewUtility.showHeader("Restocks By Inventory");
+        CliViewUtility.showScreen("Restocks By Inventory");
 //        printInventoryChoices(inventoryController.handleViewAllInventory("id"));
         int inventoryId = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
         if (inventoryId == 0) {
             return false;
         }
 
-        printRestocks(restockController.handleViewRestocksByInventory(inventoryId));
+        CliViewUtility.browsePages(
+                restockController.handleViewRestocksByInventory(inventoryId),
+                scanner, this::printRestocks);
         return true;
     }
 
     private boolean viewRestocksBySupplier() {
-        CliViewUtility.showHeader("Restocks By Supplier");
+        CliViewUtility.showScreen("Restocks By Supplier");
         List<Supplier> suppliers = new ArrayList<>(
                 supplierController.handleViewAllSuppliers("id"));
         suppliers.addAll(supplierController.handleViewArchivedSuppliers("id"));
@@ -259,25 +287,30 @@ public class RestockView {
             return false;
         }
 
-        printRestocks(restockController.handleViewRestocksBySupplier(supplierId));
+        CliViewUtility.browsePages(
+                restockController.handleViewRestocksBySupplier(supplierId),
+                scanner, this::printRestocks);
         return true;
     }
 
     private boolean viewRestocksByUser() {
-        CliViewUtility.showHeader("Restocks By User");
+        CliViewUtility.showScreen("Restocks By User");
         Map<Integer, String> users = restockController.handleGetAvailableUsers();
-        printUserChoices(users);
+        CliViewUtility.browsePages(
+                new ArrayList<>(users.entrySet()), scanner, this::printUserChoices);
         int userId = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
         if (userId == 0) {
             return false;
         }
 
-        printRestocks(restockController.handleViewRestocksByUser(userId));
+        CliViewUtility.browsePages(
+                restockController.handleViewRestocksByUser(userId),
+                scanner, this::printRestocks);
         return true;
     }
 
     private boolean viewRestocksByDateRange() {
-        CliViewUtility.showHeader("Restocks By Date / Date Range");
+        CliViewUtility.showScreen("Restocks By Date / Date Range");
         LocalDate startDate = InputUtility.readDate(
                 scanner, "Start date (YYYY-MM-DD, 0 to cancel): ");
         if (startDate == null) {
@@ -301,7 +334,9 @@ public class RestockView {
             endDate = InputUtility.parseDateOrNull(endInput);
         }
 
-        printRestocks(restockController.handleViewRestocksByDateRange(startDate, endDate));
+        CliViewUtility.browsePages(
+                restockController.handleViewRestocksByDateRange(startDate, endDate),
+                scanner, this::printRestocks);
         return true;
     }
 
@@ -318,30 +353,43 @@ public class RestockView {
     }
 
     private Supplier selectActiveSupplier() {
-        CliViewUtility.showHeader("Select Supplier");
+        CliViewUtility.showScreen("Select Supplier");
         List<Supplier> suppliers = supplierController.handleViewAllSuppliers();
-        supplierView.printSuppliers(suppliers);
+        int currentPage = 0;
 
         while (true) {
+            CliViewUtility.showScreen("Select Supplier");
+            currentPage = CliViewUtility.normalizePage(currentPage, suppliers.size());
+            supplierView.printSuppliers(CliViewUtility.page(suppliers, currentPage));
+            CliViewUtility.printPagination(currentPage, suppliers.size());
             System.out.println();
             System.out.println("[1] Select Supplier ID");
             System.out.println("[2] Add Custom Supplier");
             System.out.println("[0] Cancel");
-            int choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1:
+                case "P":
+                    currentPage = CliViewUtility.previousPage(currentPage, scanner);
+                    break;
+                case "N":
+                    currentPage = CliViewUtility.nextPage(currentPage, suppliers.size(), scanner);
+                    break;
+                case "1":
                     if (suppliers.isEmpty()) {
                         System.out.println("No active suppliers are available to select.");
+                        InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
                         break;
                     }
                     return selectSupplierById(suppliers);
-                case 2:
+                case "2":
                     return supplierView.createSupplierForStockIn();
-                case 0:
+                case "0":
                     return null;
                 default:
                     System.out.println("Invalid menu selection.");
+                    InputUtility.pressEnterToContinue(scanner, "Press Enter to continue...");
             }
         }
     }
@@ -365,7 +413,8 @@ public class RestockView {
             return null;
         }
 
-        printUserChoices(users);
+        CliViewUtility.browsePages(
+                new ArrayList<>(users.entrySet()), scanner, this::printUserChoices);
         while (true) {
             int id = InputUtility.readInt(scanner, "User ID (0 to cancel): ");
             if (id == 0) {
@@ -379,11 +428,6 @@ public class RestockView {
     }
 
     private void printRestocks(List<Restock> restocks) {
-        if (restocks.isEmpty()) {
-            System.out.println("No restock records found.");
-            return;
-        }
-
         String border = "+" + "-".repeat(6) + "+" + "-".repeat(22)
                 + "+" + "-".repeat(16) + "+" + "-".repeat(22)
                 + "+" + "-".repeat(16) + "+" + "-".repeat(18)
@@ -394,6 +438,11 @@ public class RestockView {
         System.out.printf(rowFormat, "ID", "Product", "Batch Code", "Supplier", "User",
                 "Delivered", "Quantity");
         System.out.println(border);
+        if (restocks.isEmpty()) {
+            System.out.println("No restock records found.");
+            System.out.println(border);
+            return;
+        }
         for (Restock restock : restocks) {
             System.out.printf(rowFormat,
                     restock.getId(),
@@ -407,15 +456,15 @@ public class RestockView {
         System.out.println(border);
     }
 
-    private void printUserChoices(Map<Integer, String> users) {
+    private void printUserChoices(List<Map.Entry<Integer, String>> users) {
+        System.out.printf("%-6s %-30s%n", "ID", "Username");
         if (users.isEmpty()) {
             System.out.println("No users found.");
             return;
         }
 
-        System.out.printf("%-6s %-30s%n", "ID", "Username");
-        users.forEach((id, username) ->
-                System.out.printf("%-6d %-30s%n", id, CliViewUtility.truncate(username, 30)));
+        users.forEach(user -> System.out.printf("%-6d %-30s%n",
+                user.getKey(), CliViewUtility.truncate(user.getValue(), 30)));
     }
 
 }
