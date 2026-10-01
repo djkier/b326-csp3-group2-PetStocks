@@ -9,9 +9,16 @@ public final class CliViewUtility {
     }
 
     public static void showHeader(String title) {
+        String normalizedTitle = title == null ? "" : title.trim();
+        String displayedTitle = truncate(normalizedTitle, HEADER_WIDTH);
+        int availablePadding = HEADER_WIDTH - displayedTitle.length();
+        int leftPadding = availablePadding / 2;
+        int rightPadding = availablePadding - leftPadding;
+
         System.out.println();
         System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println(title);
+        System.out.println(" ".repeat(leftPadding) + displayedTitle
+                + " ".repeat(rightPadding));
         System.out.println("=".repeat(HEADER_WIDTH));
     }
 
