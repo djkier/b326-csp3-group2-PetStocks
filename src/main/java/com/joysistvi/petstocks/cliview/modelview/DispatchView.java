@@ -267,19 +267,39 @@ public class DispatchView {
             return null;
         }
 
-        CliViewUtility.browsePages(
-                inventory, scanner, inventoryView::printStockMovementInventory);
+        int currentPage = 0;
         while (true) {
-            int id = InputUtility.readInt(scanner, "Inventory ID (0 to cancel): ");
-            if (id == 0) {
+            currentPage = CliViewUtility.normalizePage(currentPage, inventory.size());
+            inventoryView.printStockMovementInventory(
+                    CliViewUtility.page(inventory, currentPage));
+            CliViewUtility.printPagination(currentPage, inventory.size());
+            System.out.println();
+            System.out.print("Inventory ID (P = Previous, N = Next, 0 = Cancel): ");
+            String input = scanner.nextLine().trim().toUpperCase();
+
+            if ("P".equals(input)) {
+                currentPage = CliViewUtility.previousPage(currentPage);
+                continue;
+            }
+            if ("N".equals(input)) {
+                currentPage = CliViewUtility.nextPage(currentPage, inventory.size());
+                continue;
+            }
+            if ("0".equals(input)) {
                 return null;
             }
-            for (Inventory item : inventory) {
-                if (item.getId() == id) {
-                    return item;
+
+            try {
+                int id = Integer.parseInt(input);
+                for (Inventory item : inventory) {
+                    if (item.getId() == id) {
+                        return item;
+                    }
                 }
+                System.out.println("Choose an ID from the inventory list.");
+            } catch (NumberFormatException e) {
+                System.out.println("Enter an Inventory ID, P, N, or 0.");
             }
-            System.out.println("Choose an ID from the inventory list.");
         }
     }
 

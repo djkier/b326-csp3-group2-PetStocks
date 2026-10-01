@@ -158,27 +158,37 @@ public class RestockView {
 
     private Inventory selectStockInInventory() {
         List<Inventory> inventory = inventoryController.handleViewAllInventory();
-        System.out.println();
-        CliViewUtility.browsePages(
-                inventory, scanner, inventoryView::printStockMovementInventory);
+        int currentPage = 0;
 
         while (true) {
+            currentPage = CliViewUtility.normalizePage(currentPage, inventory.size());
+            System.out.println();
+            inventoryView.printStockMovementInventory(
+                    CliViewUtility.page(inventory, currentPage));
+            CliViewUtility.printPagination(currentPage, inventory.size());
             System.out.println();
             System.out.println("[1] Select Inventory ID");
             System.out.println("[2] Product Not Found / Add New Product");
             System.out.println("[0] Cancel");
-            int choice = InputUtility.readInt(scanner, "Choice: ");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
-                case 1:
+                case "P":
+                    currentPage = CliViewUtility.previousPage(currentPage);
+                    break;
+                case "N":
+                    currentPage = CliViewUtility.nextPage(currentPage, inventory.size());
+                    break;
+                case "1":
                     if (inventory.isEmpty()) {
                         System.out.println("No inventory records are available to select.");
                         break;
                     }
                     return selectInventoryById(inventory);
-                case 2:
+                case "2":
                     return createNewProductInventory();
-                case 0:
+                case "0":
                     return null;
                 default:
                     System.out.println("Invalid menu selection.");
