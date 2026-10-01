@@ -6,6 +6,7 @@ import com.joysistvi.petstocks.controller.ProductController;
 import com.joysistvi.petstocks.model.Dispatch;
 import com.joysistvi.petstocks.model.Inventory;
 import com.joysistvi.petstocks.model.Product;
+import com.joysistvi.petstocks.model.User;
 import com.joysistvi.petstocks.utility.CliViewUtility;
 import com.joysistvi.petstocks.utility.InputUtility;
 
@@ -74,6 +75,18 @@ public class DispatchView {
     }
 
     public boolean recordStockOut() {
+        return recordStockOut(null, true);
+    }
+
+    public boolean recordStockOut(User currentUser) {
+        if (currentUser == null || currentUser.getId() <= 0) {
+            System.out.println("A valid logged-in user is required to record stock out.");
+            return false;
+        }
+        return recordStockOut(currentUser, false);
+    }
+
+    private boolean recordStockOut(User currentUser, boolean promptForUser) {
         CliViewUtility.showHeader("Record Stock Out");
 
         Inventory inventory = selectInventory();
@@ -81,9 +94,15 @@ public class DispatchView {
             return false;
         }
 
-        Integer userId = selectUser();
-        if (userId == null) {
-            return false;
+        int userId;
+        if (promptForUser) {
+            Integer selectedUserId = selectUser();
+            if (selectedUserId == null) {
+                return false;
+            }
+            userId = selectedUserId;
+        } else {
+            userId = currentUser.getId();
         }
 
         int quantityDispatched = InputUtility.readInt(scanner, "Quantity dispatched (0 to cancel): ");
@@ -108,6 +127,9 @@ public class DispatchView {
                 : "Failed to record stock-out. No changes were committed.");
 
         if (isSuccess) {
+            if (!promptForUser) {
+                System.out.println("Recorded by: " + currentUser.getUsername());
+            }
             Dispatch recorded = dispatchController.handleFindDispatchById(dispatch.getId());
             if (recorded != null) {
                 System.out.println();
