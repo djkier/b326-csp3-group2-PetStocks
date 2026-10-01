@@ -231,6 +231,58 @@ public class InventoryView {
         return true;
     }
 
+    public Inventory createInitialInventory(Product product) {
+        if (product == null || product.getId() <= 0) {
+            System.out.println("A successfully created product is required.");
+            return null;
+        }
+
+        while (true) {
+            CliViewUtility.showHeader("Create Initial Inventory Batch");
+            System.out.println("Product: " + product.getName());
+            System.out.print("Batch code (0 to cancel): ");
+            String batchCode = scanner.nextLine();
+            if ("0".equals(batchCode.trim())) {
+                return null;
+            }
+
+            DateInput expirationInput = promptExpiration(
+                    "Expiration (YYYY-MM-DD, Enter for N/A, 0 to cancel): ", null, false);
+            if (expirationInput.cancelled()) {
+                return null;
+            }
+
+            System.out.print("Remark (optional): ");
+            String remark = scanner.nextLine();
+            Inventory inventory = new Inventory(
+                    product, 0, expirationInput.expiration(), batchCode, remark);
+
+            if (inventoryController.handleCreateInventory(inventory)) {
+                System.out.println("Initial inventory batch created with quantity 0.");
+                return inventory;
+            }
+
+            System.out.println("Failed to create the initial inventory batch.");
+            if (!promptToRetryInventoryCreation()) {
+                return null;
+            }
+        }
+    }
+
+    private boolean promptToRetryInventoryCreation() {
+        while (true) {
+            System.out.println("[1] Retry    [0] Cancel");
+            int choice = InputUtility.readInt(scanner, "Choice: ");
+            if (choice == 1) {
+                return true;
+            }
+            if (choice == 0) {
+                return false;
+            }
+            System.out.println("Invalid menu selection.");
+        }
+    }
+
     private boolean updateInventory() {
         CliViewUtility.showHeader("Update Inventory Record (Testing)");
         printInventory(inventoryController.handleViewAllInventory("id"));
