@@ -1,33 +1,40 @@
 package com.joysistvi.petstocks.cliview.publicview;
 
-import com.joysistvi.petstocks.utility.InputUtility;
+import com.joysistvi.petstocks.controller.UserController;
+import com.joysistvi.petstocks.model.User;
 
 import java.util.Scanner;
 
 public class LoginView {
     private static final int HEADER_WIDTH = 40;
 
+    private final UserController userController;
     private final Scanner scanner;
 
-    public LoginView(Scanner scanner) {
+    public LoginView(UserController userController, Scanner scanner) {
+        this.userController = userController;
         this.scanner = scanner;
     }
 
-    public Selection promptForSelection() {
+    public User promptForLogin() {
         while (true) {
             printMenu();
-            int choice = InputUtility.readInt(scanner, "Choice: ");
-
-            switch (choice) {
-                case 1:
-                    return Selection.STAFF;
-                case 2:
-                    return Selection.ADMIN;
-                case 0:
-                    return Selection.EXIT;
-                default:
-                    System.out.println("Invalid menu selection.");
+            System.out.print("Username: ");
+            String username = scanner.nextLine();
+            if ("0".equals(username.trim())) {
+                return null;
             }
+
+            System.out.print("Password: ");
+            String password = scanner.nextLine();
+            User authenticatedUser = userController.handleAuthenticate(username, password);
+            password = null;
+
+            if (authenticatedUser != null) {
+                return authenticatedUser;
+            }
+
+            System.out.println("Invalid username or password.");
         }
     }
 
@@ -36,14 +43,6 @@ public class LoginView {
         System.out.println("=".repeat(HEADER_WIDTH));
         System.out.println("PetStock");
         System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("1. Login as Staff");
-        System.out.println("2. Login as Administrator");
-        System.out.println("0. Exit");
-    }
-
-    public enum Selection {
-        STAFF,
-        ADMIN,
-        EXIT
+        System.out.println("Enter 0 as the username to exit.");
     }
 }
