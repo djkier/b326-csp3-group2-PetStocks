@@ -2,6 +2,7 @@ package com.joysistvi.petstocks.cliview.publicview;
 
 import com.joysistvi.petstocks.controller.UserController;
 import com.joysistvi.petstocks.model.User;
+import com.joysistvi.petstocks.utility.InputUtility;
 
 import java.util.Scanner;
 
@@ -38,11 +39,18 @@ public class LoginView {
         }
     }
 
+    public void showWelcome(User user) {
+        System.out.println();
+        System.out.println("Welcome " + user.getUsername()
+                + " to PetStock Inventory Management System");
+        InputUtility.pressEnterToContinue(scanner);
+    }
+
     private void printMenu() {
         System.out.println();
         System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("PetStock");
+        System.out.println("Login");
         System.out.println("=".repeat(HEADER_WIDTH));
-        System.out.println("Enter 0 as the username to exit.");
+        System.out.println("Enter 0 as the username to go back.");
     }
 }
