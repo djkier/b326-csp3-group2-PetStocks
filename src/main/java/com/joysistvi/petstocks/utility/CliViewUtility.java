@@ -90,6 +90,27 @@ public final class CliViewUtility {
         return expectedValue.equals(scanner.nextLine());
     }
 
+    public static boolean confirmChoice(Scanner scanner, String title, String prompt) {
+        showScreen(title);
+        System.out.println(prompt);
+        System.out.println();
+        System.out.println("[1] Yes");
+        System.out.println("[0] No");
+        System.out.println();
+
+        while (true) {
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim();
+            if ("1".equals(choice)) {
+                return true;
+            }
+            if ("0".equals(choice)) {
+                return false;
+            }
+            System.out.println("Invalid selection. Choose 1 for Yes or 0 for No.");
+        }
+    }
+
     public static int totalPages(int recordCount) {
         return Math.max(1, (recordCount + RECORDS_PER_PAGE - 1) / RECORDS_PER_PAGE);
     }
