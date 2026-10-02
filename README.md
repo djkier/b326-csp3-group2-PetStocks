@@ -172,6 +172,17 @@ You can check the `target` folder and run the generated JAR using:
 java -jar target/<generated-file-name>.jar
 ```
 
+## 💳 Business Rules
+
+- **Only registered users can access the system.** The system is accessible only to registered Admin and Staff users.
+- **Users must log in with valid credentials.** Users must provide the correct username and password before accessing inventory functions.
+- **Admin can manage products.** Admin users can add, update, delete, and view product records.
+- **Staff can access inventory functions.** Staff can view inventory, search for products, check stock, and view product details.
+- **Product information must be complete.** All required product details must be provided before a product record can be saved.
+- **Inventory changes must be saved.** Any changes to stock or inventory records must be saved to keep information updated.
+- **Access depends on the user's role.** Users can only access the system functions permitted by their assigned role.
+- **Users should log out after completing their tasks.** Logging out helps protect the system and prevent unauthorized access.
+
 ---
 
 ## Notes
