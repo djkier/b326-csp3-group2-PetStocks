@@ -4,6 +4,15 @@
 
 The system supports common inventory tasks such as adding and updating products, recording stock-in and stock-out transactions, monitoring low-stock items, and managing product information.
 
+PetStock is a Pet Supplies Inventory Management System designed to help manage and organize pet supplies efficiently. The system allows users to keep track of available products, monitor inventory, and manage pet supply information in an organized manner.
+
+## 🗒️ Objectives
+
+- To manage and organize pet supply information efficiently.
+- To monitor the available inventory of pet supplies.
+- To keep accurate records of products and their quantities.
+- To make inventory management easier and more organized.
+
 ## 🛠️ Built With
 
 PetStock was developed using:
