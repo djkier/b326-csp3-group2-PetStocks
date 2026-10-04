@@ -44,7 +44,7 @@ Before setting up the project, make sure the following are installed:
 Clone the GitHub repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/djkier/b326-csp3-group2-PetStocks.git
 ```
 
 After cloning, locate the project folder and open it using your preferred Java IDE.
@@ -161,16 +161,9 @@ target/
 Run the generated JAR:
 
 ```bash
-java -jar target/untitled-1.0-SNAPSHOT.jar
+java -jar target/PetStocks-1.0.jar
 ```
 
-> **Note:** The exact JAR filename may vary depending on the Maven configuration.
-
-You can check the `target` folder and run the generated JAR using:
-
-```bash
-java -jar target/<generated-file-name>.jar
-```
 
 ## 💳 Business Rules
 
@@ -184,20 +177,3 @@ java -jar target/<generated-file-name>.jar
 - **Users should log out after completing their tasks.** Logging out helps protect the system and prevent unauthorized access.
 
 ---
-
-## Notes
-
-If Maven generates both:
-
-```text
-untitled-1.0-SNAPSHOT.jar
-original-untitled-1.0-SNAPSHOT.jar
-```
-
-run:
-
-```bash
-java -jar target/untitled-1.0-SNAPSHOT.jar
-```
-
-The `original-...jar` file is usually the version created before Maven finishes packaging the runnable application.
