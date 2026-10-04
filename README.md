@@ -161,7 +161,7 @@ target/
 Run the generated JAR:
 
 ```bash
-java -jar target/untitled-1.0-SNAPSHOT.jar
+java -jar target/PetStocks-1.0.jar
 ```
 
 > **Note:** The exact JAR filename may vary depending on the Maven configuration.
