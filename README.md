@@ -4,6 +4,15 @@
 
 The system supports common inventory tasks such as adding and updating products, recording stock-in and stock-out transactions, monitoring low-stock items, and managing product information.
 
+PetStock is a Pet Supplies Inventory Management System designed to help manage and organize pet supplies efficiently. The system allows users to keep track of available products, monitor inventory, and manage pet supply information in an organized manner.
+
+## 🗒️ Objectives
+
+- To manage and organize pet supply information efficiently.
+- To monitor the available inventory of pet supplies.
+- To keep accurate records of products and their quantities.
+- To make inventory management easier and more organized.
+
 ## 🛠️ Built With
 
 PetStock was developed using:
@@ -44,7 +53,7 @@ Before setting up the project, make sure the following are installed:
 Clone the GitHub repository:
 
 ```bash
-git clone https://github.com/djkier/b326-csp3-group2-PetStocks.git
+git clone <repository-url>
 ```
 
 After cloning, locate the project folder and open it using your preferred Java IDE.
@@ -164,7 +173,6 @@ Run the generated JAR:
 java -jar target/PetStocks-1.0.jar
 ```
 
-
 ## 💳 Business Rules
 
 - **Only registered users can access the system.** The system is accessible only to registered Admin and Staff users.
@@ -177,3 +185,20 @@ java -jar target/PetStocks-1.0.jar
 - **Users should log out after completing their tasks.** Logging out helps protect the system and prevent unauthorized access.
 
 ---
+
+## Notes
+
+If Maven generates both:
+
+```text
+untitled-1.0-SNAPSHOT.jar
+original-untitled-1.0-SNAPSHOT.jar
+```
+
+run:
+
+```bash
+java -jar target/untitled-1.0-SNAPSHOT.jar
+```
+
+The `original-...jar` file is usually the version created before Maven finishes packaging the runnable application.
