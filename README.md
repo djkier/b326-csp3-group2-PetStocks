@@ -170,15 +170,7 @@ target/
 Run the generated JAR:
 
 ```bash
-java -jar target/untitled-1.0-SNAPSHOT.jar
-```
-
-> **Note:** The exact JAR filename may vary depending on the Maven configuration.
-
-You can check the `target` folder and run the generated JAR using:
-
-```bash
-java -jar target/<generated-file-name>.jar
+java -jar target/PetStocks-1.0.jar
 ```
 
 ## 💳 Business Rules
