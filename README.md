@@ -44,7 +44,7 @@ Before setting up the project, make sure the following are installed:
 Clone the GitHub repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/djkier/b326-csp3-group2-PetStocks.git
 ```
 
 After cloning, locate the project folder and open it using your preferred Java IDE.
